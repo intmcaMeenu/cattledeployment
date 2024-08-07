@@ -1,0 +1,63 @@
+{% load static %}
+{% load socialaccount %}
+{% providers_media_js %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Form</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap">
+    <script src="https://kit.fontawesome.com/64d58efce2.js" crossorigin="anonymous"></script>
+    <link href="{% static 'css/login.css' %}" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <div class="panels-container">
+            <div class="panel left-panel">
+                <div class="content">
+                    <h3>New here?</h3>
+                    <p>Log in to continue your journey with us and manage your cattle effortlessly.</p>
+                    <a href="{% url 'register_page' %}">
+                        <button class="btn transparent">Sign up</button>
+                    </a>
+                    <a href="{% url 'index' %}">
+                        <button class="btn transparent">Home</button>
+                    </a>
+                </div>
+                <img src="{% static 'img/logimg.png' %}" class="image" width="100%" height="500px" alt="Image">
+            </div>
+            <div class="panel right-panel">
+                <div class="content">
+                    <h2 class="title">Login</h2>
+                    <form method="POST" action="{% url 'login_page' %}" class="login-form">
+                        {% csrf_token %}
+                        <div class="input-field-container">
+                            <div class="input-field">
+                                <i class="fas fa-envelope"></i>
+                                <input type="email" name="email" placeholder="Email" required>
+                            </div>
+                            <div class="input-field">
+                                <i class="fas fa-lock"></i>
+                                <input type="password" name="password" placeholder="Password" required>
+                            </div>
+                        </div>
+                        <a href="{% url 'password_reset_request' %}" class="forgot-password">Forgot Password?</a>
+                        <input type="submit" name="submit" class="btn" value="Login">
+                        <p class="social-text">Or Login with Google</p>
+                        <div class="social-media">
+                            <a href="{% provider_login_url 'google' %}" class="social-icon google-btn">
+                                <i class="fab fa-google"></i>
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+ 

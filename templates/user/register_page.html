@@ -1,0 +1,73 @@
+{% load static %}
+{% load socialaccount %}
+{% providers_media_js %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign up Form</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap">
+    <script src="https://kit.fontawesome.com/64d58efce2.js" crossorigin="anonymous"></script>
+    <link href="{% static 'css/register.css' %}" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <div class="panels-container">
+            <div class="panel left-panel">
+                <div class="content">
+                    <h3>One of us?</h3>
+                    <p>Welcome to Cattle Care! We're excited to have you on board. Sign up today and start managing your cattle with ease.</p>
+                    <a href="{% url 'login_page' %}">
+                        <button class="btn transparent">Sign in</button>
+                    </a>
+                    <a href="{% url 'index' %}">
+                        <button class="btn transparent">Home</button>
+                    </a>
+                </div>
+                <img src="{% static 'img/logimg.png' %}" class="image" width="100%"height="500px" alt="Image">
+            </div>
+            <div class="panel right-panel">
+                <div class="content">
+                    <h2 class="title">Sign up</h2>
+                    <form method="POST" action="{% url 'register_page' %}" class="sign-up-form">
+                        {% csrf_token %}
+                        <div class="input-field">
+                            <i class="fas fa-user"></i>
+                            <input type="text" name="fname" placeholder="First Name" required>
+                        </div>
+                        <div class="input-field">
+                            <i class="fas fa-user"></i>
+                            <input type="text" name="lname" placeholder="Last Name" required>
+                        </div>
+                        <div class="input-field">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" name="email" placeholder="Email" required>
+                        </div>
+                        <div class="input-field">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" name="password1" placeholder="Password" required>
+                        </div>
+                        <div class="input-field">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" name="password2" placeholder="Confirm Password" required>
+                        </div>
+                        <input type="submit" name="submit" class="btn" value="Sign up">
+                        <p class="social-text">Or Sign up with Google</p>
+                        <div class="social-media">
+                            
+                            <a href="{% provider_login_url 'google' %}" class="social-icon">
+                                <i class="fab fa-google"></i>
+                            </a>
+                            
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
