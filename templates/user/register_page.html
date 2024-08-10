@@ -7,10 +7,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign up Form</title>
+    <title>Register</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap">
     <script src="https://kit.fontawesome.com/64d58efce2.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="{% static 'css/register.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <style>
+        .error-message {
+            color: red;
+            font-weight: bold;
+            font-size: 0.8em;
+            margin-top: 5px;
+            display: block;
+            position: absolute;
+            right: -220px;
+            width: 200px;
+            text-align: left;
+            max-height: 2.4em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        .input-field {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .input-field input {
+            width: 100%;
+        }
+    </style>
 </head>
 
 <body>
@@ -27,43 +57,108 @@
                         <button class="btn transparent">Home</button>
                     </a>
                 </div>
-                <img src="{% static 'img/logimg.png' %}" class="image" width="100%"height="500px" alt="Image">
+                <img src="{% static 'img/logimg.png' %}" class="image" width="100%" height="500px" alt="Image">
             </div>
             <div class="panel right-panel">
                 <div class="content">
-                    <h2 class="title">Sign up</h2>
-                    <form method="POST" action="{% url 'register_page' %}" class="sign-up-form">
+                   <center> <h2 class="title">Sign Up</h2></center>
+                    <form method="POST" action="{% url 'register_page' %}" class="sign-up-form" id="registerForm">
                         {% csrf_token %}
                         <div class="input-field">
                             <i class="fas fa-user"></i>
-                            <input type="text" name="fname" placeholder="First Name" required>
+                            <input type="text" name="fname" placeholder="First Name" required oninput="validateField(this, 'name')">
+                            <span class="error-message" id="fname-error"></span>
                         </div>
                         <div class="input-field">
                             <i class="fas fa-user"></i>
-                            <input type="text" name="lname" placeholder="Last Name" required>
+                            <input type="text" name="lname" placeholder="Last Name" required oninput="validateField(this, 'name')">
+                            <span class="error-message" id="lname-error"></span>
                         </div>
                         <div class="input-field">
                             <i class="fas fa-envelope"></i>
-                            <input type="email" name="email" placeholder="Email" required>
+                            <input type="email" name="email" placeholder="Email" required oninput="validateField(this, 'email')">
+                            <span class="error-message" id="email-error"></span>
                         </div>
                         <div class="input-field">
                             <i class="fas fa-lock"></i>
-                            <input type="password" name="password1" placeholder="Password" required>
+                            <input type="password" name="password1" placeholder="Password" required oninput="validateField(this, 'password')">
+                            <span class="error-message" id="password1-error"></span>
                         </div>
                         <div class="input-field">
                             <i class="fas fa-lock"></i>
-                            <input type="password" name="password2" placeholder="Confirm Password" required>
+                            <input type="password" name="password2" placeholder="Confirm Password" required oninput="validateField(this, 'confirm-password')">
+                            <span class="error-message" id="password2-error"></span>
                         </div>
-                        <input type="submit" name="submit" class="btn" value="Sign up">
-                        <p class="social-text">Or Sign up with Google</p>
+                        <center><input type="submit" name="submit" class="btn" value="Sign Up">
+                       
                         <div class="social-media">
-                            
-                            <a href="{% provider_login_url 'google' %}" class="social-icon">
-                                <i class="fab fa-google"></i>
+                            <a href="{% provider_login_url 'google' %}" class="google-btn">
+                                Sign up with Google
                             </a>
-                            
+                        </center>
                         </div>
                     </form>
+                    <script>
+                        function validateField(field, type) {
+                            let errorMessage = '';
+                            if (type === 'name') {
+                                const nameRegex = /^[A-Za-z]+$/;
+                                if (!nameRegex.test(field.value)) {
+                                    errorMessage = 'Only characters allowed';
+                                }
+                            } else if (type === 'email') {
+                                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                                if (!emailRegex.test(field.value)) {
+                                    errorMessage = 'Enter a valid email';
+                                }
+                            } else if (type === 'password') {
+                                const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/;
+                                if (!passwordRegex.test(field.value)) {
+                                    errorMessage = 'Password: 6+ chars, 1 letter, 1 number, 1 special char';
+                                }
+                            } else if (type === 'confirm-password') {
+                                const password1 = document.querySelector('input[name="password1"]').value;
+                                if (field.value !== password1) {
+                                    errorMessage = 'Passwords do not match';
+                                }
+                            }
+
+                            const errorElement = document.getElementById(field.name + '-error');
+                            if (errorMessage) {
+                                errorElement.textContent = errorMessage;
+                                field.style.borderColor = 'red';
+                            } else {
+                                errorElement.textContent = '';
+                                field.style.borderColor = 'green';
+                            }
+                        }
+
+                        document.getElementById('registerForm').addEventListener('submit', function(e) {
+                            
+                            // Simulate form submission
+                            // In a real scenario, you'd send this data to the server
+                            const email = document.querySelector('input[name="email"]').value;
+                            const password = document.querySelector('input[name="password1"]').value;
+
+                            // Simulating server response
+                            if (email == '' || password == '') {
+                                toastr.error('Invalid email or password. Please try again.', 'Error', {
+                                    closeButton: true,
+                                    progressBar: true,
+                                    positionClass: "toast-top-center",
+                                    timeOut: 5000
+                                });
+                            } else {
+                                toastr.success('Registration successful!', 'Success', {
+                                    closeButton: true,
+                                    progressBar: true,
+                                    positionClass: "toast-top-center",
+                                    timeOut: 5000
+                                });
+                                // Here you would typically redirect the user or perform other actions
+                            }
+                        });
+                    </script>
                 </div>
             </div>
         </div>

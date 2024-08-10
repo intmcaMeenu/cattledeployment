@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.urls import reverse
 from django.contrib.auth import get_user_model
@@ -14,55 +14,57 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth import get_user_model
-
+from django.contrib.auth import logout as auth_logout
+from django.http import HttpResponseRedirect
+from django.contrib.auth import authenticate, login
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 User = get_user_model()
 
 def index(request):
-    return render(request, 'user/index.html')
 
+        return render(request, 'user/index.html')
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+@csrf_exempt
 def login_page(request):
-    user = request.user
+    user=request.user
+    if user.is_authenticated:
+            return render(request,'user/indexcattle.html')
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
         user = authenticate(request, username=email, password=password)
-        
+
         if user is not None:
             login(request, user)
-            if not user.profile_completed and user.role==1:
-                return redirect('profile_completion')
-            if user.is_superuser:
+            if user.is_superuser and user.is_staff:
                 return redirect('admin_index')
-            else:
-                return redirect('indexcattle')
+            elif user.role==1:
+                if user.contact==None and user.city==None and user.house_name==None and user.postal_code==None:
+                        return redirect('profile_completion')
+                else:
+                    return render(request, 'user/indexcattle.html')
         else:
-            return render(request, 'user/login_page.html', {'error': 'Invalid login credentials'})
-    elif user.is_authenticated:
-        if not user.profile_completed and user.role==1:
-                return redirect('profile_completion')
-        if user.is_superuser:
-            return redirect('admin_index')
-        else:
-            return redirect('indexcattle')
-    
-    
+            messages.error(request, 'Invalid Credentials!Try Again')
+            return redirect('login_page')
     return render(request, 'user/login_page.html')
-
 
 
 def userlogout(request):
     logout(request)
-    return redirect('index')
+    return redirect('login_page')
 
 @login_required
 def admin_index(request):
-    return render(request, 'admin2/admin_index.html')
+    return render(request, 'admin2/index.html')
 
 @login_required
 def indexcattle(request):
-    if not request.user.profile_completed:
-        return redirect('profile_completion')
-    return render(request, 'user/indexcattle.html')
+    return render(request,'user/indexcattle.html')
 
 
 
@@ -189,3 +191,19 @@ def profile_update(request):
         'user': user
     }
     return render(request, 'user/profile_update.html', context)
+
+@login_required
+def active_users(request):
+    profiles = User.objects.filter(role=1)
+    return render(request, 'admin2/admin_userview.html', {'profiles': profiles})
+
+def toggleusers(request,uid):
+    user=User.objects.get(id=uid)
+    if user.is_active==True:
+        user.is_active=False
+    else:
+        user.is_active=True
+    user.save()
+    return redirect('admin_userview')
+
+

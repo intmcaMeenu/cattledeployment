@@ -13,4 +13,7 @@ urlpatterns = [
     path('profile_completion/', views.profile_completion, name='profile_completion'),
     path('profile_view/', views.profile_view, name='profile_view'),
     path('profile_update/', views.profile_update, name='profile_update'), 
+    path('admin_userview/',views.active_users,name='admin_userview'),
+    path('toggleusers/<int:uid>',views.toggleusers,name='toggleusers'),
+    
 ]
