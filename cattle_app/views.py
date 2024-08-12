@@ -346,66 +346,7 @@ def user_dashboard(request):
     }
     return render(request, 'user/user_dashboard.html', context)
 
-@login_required
-def user_sell(request):
-    if request.method == 'POST':
-        category_id = request.POST.get('category')
-        subcategory_id = request.POST.get('subcategory')
-        new_subcategory = request.POST.get('new_subcategory')
-        dob = request.POST.get('dob')
-        weight = request.POST.get('weight')
-        color = request.POST.get('color')
-        image = request.FILES.get('image')
-        number_of_cattle = request.POST.get('number_of_cattle')
-        milk_production = request.POST.get('milk_production')
 
-        try:
-            category = Category.objects.get(id=category_id)
-            
-            if subcategory_id:
-                subcategory = Subcategory.objects.get(id=subcategory_id)
-               
-            elif new_subcategory:
-                subcategory, created = Subcategory.objects.get_or_create(
-                    category=category,
-                    subcategory_name=new_subcategory
-                )
-            else:
-                messages.error(request, 'Please select a breed or enter a new one.')
-                return redirect('user_cattle')
-            cattle = Cattle(
-                user=request.user,
-                category=category,
-                subcategory=subcategory,
-                dob=dob,
-                weight=weight,
-                color=color,
-                image=image,
-                number_of_cattle=number_of_cattle,
-                milk_production=milk_production
-            )
-            cattle.save()
-            messages.success(request, 'Cattle added successfully.')
-            return redirect('user_dashboard')
-
-           
-        except Category.DoesNotExist:
-            messages.error(request, 'Selected category does not exist.')
-        except Subcategory.DoesNotExist:
-            messages.error(request, 'Selected subcategory does not exist.')
-        except Exception as e:
-            messages.error(request, f'An error occurred: {str(e)}')
-            
-        return redirect('user_dashboard')
-
-    
-    
-
-
-def get_subcategories(request):
-    category_id = request.GET.get('category_id')
-    subcategories = Subcategory.objects.filter(category_id=category_id)
-    return render(request, 'user/subcategory_options.html', {'subcategories': subcategories})
 
 @login_required
 def user_cattle(request):

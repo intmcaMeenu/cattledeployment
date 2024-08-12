@@ -26,7 +26,7 @@ urlpatterns = [
     path('user_dashboard/', views.user_dashboard, name='user_dashboard'),
     path('user_cattle/', views.user_cattle, name='user_cattle'),
     path('get_subcategories/', views.get_subcategories, name='get_subcategories'),
-    path('user_sell/', views.user_sell, name='user_sell'),
+    
     
 
     
