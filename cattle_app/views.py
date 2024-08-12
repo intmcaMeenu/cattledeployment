@@ -3,7 +3,7 @@ from django.contrib.auth import login, authenticate, logout
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from cattle_app.models import User, PasswordResetToken
+from cattle_app.models import User, PasswordResetToken, Category
 from datetime import datetime, timedelta
 from django.utils import timezone
 from django.http import HttpResponse
@@ -19,11 +19,20 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth import authenticate, login
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Category
+from django.core.files.storage import FileSystemStorage
+from django.core.files.storage import default_storage
+from django.db import IntegrityError
+from .models import Category, Subcategory,Cattle
+import traceback
+
+
 User = get_user_model()
 
 def index(request):
-
-        return render(request, 'user/index.html')
+    categories = Category.objects.all()
+    return render(request, 'user/index.html',{'categories': categories})
 
 import logging
 
@@ -205,5 +214,266 @@ def toggleusers(request,uid):
         user.is_active=True
     user.save()
     return redirect('admin_userview')
+
+@login_required
+def admin_category(request):
+    if request.method == 'POST':
+        category_name = request.POST['category_name']
+        if Category.objects.filter(category_name__iexact=category_name).exists():
+            return render(request, 'admin2/admin_category.html', {
+                'error': 'This category already exists.',
+                'categories': Category.objects.all()
+            })
+        try:
+            if 'category_image' in request.FILES:
+                image = request.FILES['category_image']
+                file_name = default_storage.save(f'category_images/{image.name}', image)
+                category = Category(category_name=category_name, category_image=file_name)
+            else:
+                category = Category(category_name=category_name)
+            category.save()
+            messages.success(request, 'Category added successfully.')
+        except IntegrityError:
+            messages.error(request, 'This category already exists.')
+        return redirect('admin_category')
+    categories = Category.objects.all()
+    return render(request, 'admin2/admin_category.html', {'categories': categories})
+
+def category_edit(request):
+    if request.method == 'POST':
+        category_id = request.POST['category_id']
+        category_name = request.POST['category_name']
+        category = get_object_or_404(Category, pk=category_id)
+        if Category.objects.filter(category_name__iexact=category_name).exclude(pk=category_id).exists():
+            return render(request, 'admin2/admin_category.html', {
+                'error': 'This category already exists.',
+                'categories': Category.objects.all()
+            })
+        try:
+            category.category_name = category_name
+            if 'category_image' in request.FILES:
+                image = request.FILES['category_image']
+                file_name = default_storage.save(f'category_images/{image.name}', image)
+                category.category_image = file_name
+            category.save()
+            messages.success(request, 'Category updated successfully.')
+        except IntegrityError:
+            messages.error(request, 'This category already exists.')
+        return redirect('admin_category')
+
+def category_delete(request):
+    category_id = request.GET.get('id')
+    category = get_object_or_404(Category, pk=category_id)
+    if category.category_image:
+        default_storage.delete(category.category_image.name)
+    category.delete()
+    messages.success(request, 'Category deleted successfully.')
+    return redirect('admin_category')
+
+@login_required
+def admin_subcategory(request):
+    if request.method == 'POST':
+        category_id = request.POST['category']
+        subcategory_name = request.POST['subcategory_name']
+        subcategory_description = request.POST['subcategory_description']
+        
+        category = get_object_or_404(Category, pk=category_id)
+        
+        if Subcategory.objects.filter(subcategory_name__iexact=subcategory_name, category=category).exists():
+            messages.error(request, 'This subcategory already exists for the selected category.')
+        else:
+            try:
+                subcategory = Subcategory(
+                    category=category,
+                    subcategory_name=subcategory_name,
+                    subcategory_description=subcategory_description
+                )
+                subcategory.save()
+                messages.success(request, 'Subcategory added successfully.')
+            except IntegrityError:
+                messages.error(request, 'An error occurred while adding the subcategory.')
+        
+        return redirect('admin_subcategory')
+    
+    categories = Category.objects.all()
+    subcategories = Subcategory.objects.all()
+    context = {
+        'categories': categories,
+        'subcategories': subcategories
+    }
+    return render(request, 'admin2/admin_subcategory.html', context)
+
+def subcategory_edit(request):
+    if request.method == 'POST':
+        subcategory_id = request.POST['subcategory_id']
+        category_id = request.POST['category']
+        subcategory_name = request.POST['subcategory_name']
+        subcategory_description = request.POST['subcategory_description']
+        
+        subcategory = get_object_or_404(Subcategory, pk=subcategory_id)
+        category = get_object_or_404(Category, pk=category_id)
+        
+        if Subcategory.objects.filter(subcategory_name__iexact=subcategory_name, category=category).exclude(pk=subcategory_id).exists():
+            messages.error(request, 'This subcategory already exists for the selected category.')
+        else:
+            try:
+                subcategory.category = category
+                subcategory.subcategory_name = subcategory_name
+                subcategory.subcategory_description = subcategory_description
+                subcategory.save()
+                messages.success(request, 'Subcategory updated successfully.')
+            except IntegrityError:
+                messages.error(request, 'An error occurred while updating the subcategory.')
+        
+        return redirect('admin_subcategory')
+
+def subcategory_delete(request):
+    subcategory_id = request.GET.get('id')
+    if subcategory_id:
+        subcategory = get_object_or_404(Subcategory, pk=subcategory_id)
+        subcategory.delete()
+        messages.success(request, 'Subcategory deleted successfully.')
+    else:
+        messages.error(request, 'Invalid subcategory ID.')
+    return redirect('admin_subcategory')
+
+
+@login_required
+def user_dashboard(request):
+    user = request.user
+    context = {
+        'user': user,
+    }
+    return render(request, 'user/user_dashboard.html', context)
+
+@login_required
+def user_sell(request):
+    if request.method == 'POST':
+        category_id = request.POST.get('category')
+        subcategory_id = request.POST.get('subcategory')
+        new_subcategory = request.POST.get('new_subcategory')
+        dob = request.POST.get('dob')
+        weight = request.POST.get('weight')
+        color = request.POST.get('color')
+        image = request.FILES.get('image')
+        number_of_cattle = request.POST.get('number_of_cattle')
+        milk_production = request.POST.get('milk_production')
+
+        try:
+            category = Category.objects.get(id=category_id)
+            
+            if subcategory_id:
+                subcategory = Subcategory.objects.get(id=subcategory_id)
+               
+            elif new_subcategory:
+                subcategory, created = Subcategory.objects.get_or_create(
+                    category=category,
+                    subcategory_name=new_subcategory
+                )
+            else:
+                messages.error(request, 'Please select a breed or enter a new one.')
+                return redirect('user_cattle')
+            cattle = Cattle(
+                user=request.user,
+                category=category,
+                subcategory=subcategory,
+                dob=dob,
+                weight=weight,
+                color=color,
+                image=image,
+                number_of_cattle=number_of_cattle,
+                milk_production=milk_production
+            )
+            cattle.save()
+            messages.success(request, 'Cattle added successfully.')
+            return redirect('user_dashboard')
+
+           
+        except Category.DoesNotExist:
+            messages.error(request, 'Selected category does not exist.')
+        except Subcategory.DoesNotExist:
+            messages.error(request, 'Selected subcategory does not exist.')
+        except Exception as e:
+            messages.error(request, f'An error occurred: {str(e)}')
+            
+        return redirect('user_dashboard')
+
+    
+    
+
+
+def get_subcategories(request):
+    category_id = request.GET.get('category_id')
+    subcategories = Subcategory.objects.filter(category_id=category_id)
+    return render(request, 'user/subcategory_options.html', {'subcategories': subcategories})
+
+@login_required
+def user_cattle(request):
+    categories = Category.objects.all()
+    subcategories = Subcategory.objects.all()
+
+    if request.method == 'POST':
+        category_id = request.POST.get('category')
+        subcategory_id = request.POST.get('subcategory')
+        new_subcategory = request.POST.get('new_subcategory')
+        dob = request.POST.get('dob')
+        weight = request.POST.get('weight')
+        color = request.POST.get('color')
+        image = request.FILES.get('image')
+        number_of_cattle = request.POST.get('number_of_cattle')
+        milk_production = request.POST.get('milk_production')
+
+        try:
+            category = Category.objects.get(id=category_id)
+            
+            if subcategory_id:
+                subcategory = Subcategory.objects.get(id=subcategory_id)
+                cattle = Cattle(
+                user=request.user,
+                category=category,
+                subcategory=subcategory,
+                dob=dob,
+                weight=weight,
+                color=color,
+                image=image,
+                number_of_cattle=number_of_cattle,
+                milk_production=milk_production
+            )
+                cattle.save()
+                messages.success(request, 'Cattle added successfully.')
+                return redirect('user_dashboard')
+            elif new_subcategory:
+                subcategory, created = Subcategory.objects.get_or_create(
+                    category=category,
+                    subcategory_name=new_subcategory
+                )
+            else:
+                messages.error(request, 'Please select a breed or enter a new one.')
+                return redirect('user_cattle')
+
+           
+        except Category.DoesNotExist:
+            messages.error(request, 'Selected category does not exist.')
+        except Subcategory.DoesNotExist:
+            messages.error(request, 'Selected subcategory does not exist.')
+        except Exception as e:
+            messages.error(request, f'An error occurred: {str(e)}')
+
+    context = {
+        'categories': categories,
+        'subcategories': subcategories,
+    }
+    return render(request, 'user/user_cattle.html', context)
+
+
+def get_subcategories(request):
+    category_id = request.GET.get('category_id')
+    subcategories = Subcategory.objects.filter(category_id=category_id)
+    return render(request, 'user/subcategory_options.html', {'subcategories': subcategories})
+
+
+
+
+
 
 

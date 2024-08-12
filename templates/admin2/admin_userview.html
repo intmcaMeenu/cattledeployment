@@ -1,31 +1,6 @@
 {% extends 'admin2/admin_index.html' %}
 {% load static %}
-
 {% block content %}
-<!-- DataTables CSS -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
-<!-- Bootstrap CSS -->
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-<!-- DataTables JS -->
-<script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
-<!-- Bootstrap JS -->
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-
-<script>
-    $(document).ready(function() {
-        // Initialize DataTables without sorting the ID column
-        $('#userdatatable').DataTable({
-            "order": [], // Disables initial sorting
-            "columnDefs": [{
-                "targets": 0, // Target the ID column
-                "orderable": false // Disable sorting on the ID column
-            }]
-        });
-    });
-</script>
 
 <div class="main-panel">
     <div class="content">
@@ -36,37 +11,47 @@
                     <div class="card">
                         <div class="card-header">
                             <div class="card-title">User List</div>
+                            <div class="float-right">
+                                <input type="text" id="userSearch" class="form-control form-control-sm rounded-pill" placeholder="Search users..." style="width: 200px; border-radius: 50px;">
+                            </div>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table id="userdatatable" class="display table table-striped table-hover">
                                     <thead>
                                         <tr>
-                                            <th>ID</th>
-                                            <th>First Name</th>
-                                            <th>Last Name</th>
+                                            <th>Sl No</th>
+                                            <th>Name</th>
                                             <th>Email</th>
                                             <th>Contact</th>
+                                            <th>House Name</th>
                                             <th>City</th>
+                                            <th>Postal Code</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {% for user in profiles %}
-                                        <tr>
-                                            <td>{{ forloop.counter }}</td> <!-- Sequential ID numbers -->
-                                            <td>{{ user.first_name }}</td>
-                                            <td>{{ user.last_name }}</td>
+                                        <tr class="user-row">
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>{{ user.first_name }} {{ user.last_name }}</td>
                                             <td>{{ user.email }}</td>
                                             <td>{{ user.contact }}</td>
+                                            <td>{{ user.house_name }}</td>
                                             <td>{{ user.city }}</td>
+                                            <td>{{ user.postal_code }}</td>
                                             <td>
-                                                 <a href="{% url 'toggleusers' user.id %}" class="deactivate-btn" data-user-id="{{ user.id }}">deactivate
+                                                <a href="{% url 'toggleusers' user.id %}" class="btn {% if user.is_active %}btn-success{% else %}btn-danger{% endif %} toggle-btn" data-user-id="{{ user.id }}">
+                                                    {% if user.is_active %}Active{% else %}Inactive{% endif %}
+                                                </a>
                                             </td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
                                 </table>
+                                <div id="noDataFound" style="display: none; text-align: center; padding: 20px;">
+                                    No data found.
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -75,4 +60,39 @@
         </div>
     </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('userSearch');
+    const tableRows = document.querySelectorAll('.user-row');
+    const noDataFound = document.getElementById('noDataFound');
+
+    let filteredRows = [...tableRows];
+
+    function showRows() {
+        tableRows.forEach(row => row.style.display = 'none');
+        filteredRows.forEach(row => row.style.display = '');
+
+        if (filteredRows.length === 0) {
+            noDataFound.style.display = 'block';
+        } else {
+            noDataFound.style.display = 'none';
+        }
+    }
+
+    function filterRows() {
+        const searchTerm = searchInput.value.toLowerCase();
+        filteredRows = [...tableRows].filter(row => 
+            row.textContent.toLowerCase().includes(searchTerm)
+        );
+        showRows();
+    }
+
+    searchInput.addEventListener('input', filterRows);
+
+    showRows();
+});
+</script>
+
 {% endblock %}

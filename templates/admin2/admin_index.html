@@ -29,6 +29,10 @@
 			color: red; /* Color the icon red */
 			margin-right: 5px; /* Adjust the spacing as needed */
 		}
+		.blue-box .nav-item a:hover {
+			background-color: transparent !important;
+			box-shadow: none !important;
+		}
 	</style>
 </head>
 <body>
@@ -46,16 +50,7 @@
 			<nav class="navbar navbar-header navbar-expand-lg">
 				<div class="container-fluid">
 					
-					<form class="navbar-left navbar-form nav-search mr-md-3" action="">
-						<div class="input-group">
-							<input type="text" placeholder="Search ..." class="form-control">
-							<div class="input-group-append">
-								<span class="input-group-text">
-									<i class="la la-search search-icon"></i>
-								</span>
-							</div>
-						</div>
-					</form>
+					
 					<ul class="navbar-nav topbar-nav ml-md-auto align-items-center">
 						
 						<li class="nav-item dropdown hidden-caret">
@@ -81,28 +76,9 @@
 										
 							</ul>
 						</li>
-						<li class="nav-item dropdown">
-							<a class="dropdown-toggle profile-pic" data-toggle="dropdown" href="#" aria-expanded="false"> <span >CattleCare</span></span> </a>
-							<ul class="dropdown-menu dropdown-user">
-								<li>
-									<div class="user-box">
-										<div class="u-text">
-											<h4>CattleCare</h4>
-											<p class="text-muted">cattlecare7@gmail.com</p>
-										</div>
-									</div>
-								</li>
-								<div class="dropdown-divider"></div>
-								<li>
-									<a id="logout-link" class="nav-link click-scroll" href="{% url 'logout' %}">
-										<i class="fa-solid fa-power-off logout-icon"></i> logout
-									</a>
-								</li>
-							</ul>
-								<!-- /.dropdown-user -->
-							</li>
-						</ul>
-					</div>
+						<li>
+							 <span ><strong>CattleCare7@gmail.com</strong></span>
+				
 				</nav>
 			</div>
 			<div class="sidebar">
@@ -146,23 +122,22 @@
 						</li>
 						<li class="nav-item">
 							<a href="{% url 'admin_userview' %}"> 
-								<i class="la la-table"></i>
-					
+								<i class="la la-users"></i>
 								<p>Registered Users</p>
 								<span class="badge badge-count">14</span>
 							</a>
 						</li>
 						<li class="nav-item">
-							<a href="forms.html">
-								<i class="la la-keyboard-o"></i>
-								<p>Forms</p>
+							<a href="{% url 'admin_category' %}"> 
+								<i class="fa fa-plus" aria-hidden="true"></i>
+								<p>Category</p>
 								<span class="badge badge-count">50</span>
 							</a>
 						</li>
 						<li class="nav-item">
-							<a href="tables.html">
-								<i class="la la-th"></i>
-								<p>Tables</p>
+							<a href="{% url 'admin_subcategory' %}"> 
+								<i class="fa fa-plus" aria-hidden="true"></i>
+								<p>sub Category</p>
 								<span class="badge badge-count">6</span>
 							</a>
 						</li>
@@ -186,12 +161,14 @@
 								<p>Icons</p>
 							</a>
 						</li>
-						<li class="nav-item update-pro">
-							<button  data-toggle="modal" data-target="#modalUpdate">
-								<i class="la la-hand-pointer-o"></i>
-								<p>Update To Pro</p>
-							</button>
-						</li>
+						<div class="blue-box" style="background-color: #007bff; width: 100%; padding: 6px; margin-top: 20px;">
+							<li class="nav-item">
+								<a href="{% url 'logout' %}" style="color: white;">
+									<i class="la la-power-off"></i>
+									<p>Logout</p>
+								</a>
+							</li>
+						</div>
 					</ul>
 				</div>
 			</div>
