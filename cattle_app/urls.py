@@ -25,10 +25,15 @@ urlpatterns = [
     path('subcategory_delete/', views.subcategory_delete, name='subcategory_delete'),
     path('user_dashboard/', views.user_dashboard, name='user_dashboard'),
     path('user_cattle/', views.user_cattle, name='user_cattle'),
-    path('get_subcategories/', views.get_subcategories, name='get_subcategories'),
-    
+    path('get-subcategories/', views.get_subcategories, name='get_subcategories'),
+    path('user_productview/<int:product_id>/', views.user_productview, name='user_productview'),
+    path('user_productlogview/<int:product_id>/', views.user_productlogview, name='user_productlogview'),
+    path('adminview_cattle/', views.adminview_cattle, name='adminview_cattle'),
+    path('category/<int:category_id>/', views.category_detail, name='category_detail'),
+    path('category_log/<int:category_id>/', views.category_detaillog, name='category_detaillog'),
     
 
+    
     
     
 ]

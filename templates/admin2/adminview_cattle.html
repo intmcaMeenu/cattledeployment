@@ -1,0 +1,67 @@
+{% extends 'admin2/admin_index.html' %}
+{% load static %}
+
+{% block content %}
+<div class="main-panel">
+    <div class="content">
+        <div class="container-fluid">
+            <h4 class="page-title">Cattle View</h4>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Registered Cattle</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr><b>
+                                            <th>Sl No</th>
+                                            <th>Category</th>
+                                            <th>Subcategory</th>
+                                            <th>Price</th>
+                                            <th>Date of Birth</th>
+                                            <th>Weight</th>
+                                            <th>Color</th>
+                                            <th>Number of Cattle</th>
+                                            <th>Milk Production</th>
+                                            <th>Image</th></b>
+                                            
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for cattle in cattle %}
+                                        <tr>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>{{ cattle.category.category_name }}</td>
+                                            <td>{{ cattle.subcategory.subcategory_name }}</td>
+                                            <td>₹{{ cattle.price }}</td>
+                                            <td>{{ cattle.dob }}</td>
+                                            <td>{{ cattle.weight }} kg</td>
+                                            <td>{{ cattle.color }}</td>
+                                            <td>{{ cattle.number_of_cattle }}</td>
+                                            <td>{{ cattle.milk_production }} liters/day</td>
+                                            <td>
+                                                <img src="{{ cattle.image.url }}" alt="{{ cattle.subcategory.subcategory_name }}" style="width: 100px; height: auto;">
+                                            </td>
+                                            <td>
+                                               
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="11" class="text-center">No cattle registered yet.</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

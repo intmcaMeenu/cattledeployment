@@ -25,6 +25,11 @@ from django.core.files.storage import FileSystemStorage
 from django.core.files.storage import default_storage
 from django.db import IntegrityError
 from .models import Category, Subcategory,Cattle
+from django.db.models import Q
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.http import JsonResponse
+from .models import Subcategory
+
 import traceback
 
 
@@ -32,7 +37,7 @@ User = get_user_model()
 
 def index(request):
     categories = Category.objects.all()
-    return render(request, 'user/index.html',{'categories': categories})
+    return render(request, 'user/index.html', {'categories': categories})
 
 import logging
 
@@ -41,8 +46,11 @@ logger = logging.getLogger(__name__)
 @csrf_exempt
 def login_page(request):
     user=request.user
-    if user.is_authenticated:
-            return render(request,'user/indexcattle.html')
+    if user.is_authenticated and user.role==1:
+        if user.contact==None and user.city==None and user.house_name==None and user.postal_code==None:
+            return redirect('profile_completion')
+        else:
+            return redirect('indexcattle')
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
@@ -56,7 +64,7 @@ def login_page(request):
                 if user.contact==None and user.city==None and user.house_name==None and user.postal_code==None:
                         return redirect('profile_completion')
                 else:
-                    return render(request, 'user/indexcattle.html')
+                    return redirect('indexcattle')
         else:
             messages.error(request, 'Invalid Credentials!Try Again')
             return redirect('login_page')
@@ -69,11 +77,13 @@ def userlogout(request):
 
 @login_required
 def admin_index(request):
+    
     return render(request, 'admin2/index.html')
 
 @login_required
 def indexcattle(request):
-    return render(request,'user/indexcattle.html')
+    categories = Category.objects.all()
+    return render(request, 'user/indexcattle.html',  {'categories': categories})
 
 
 
@@ -149,6 +159,7 @@ def reset_password(request, token):
     
     return render(request, 'user/new_password.html', {'token': token})
 
+@login_required
 def profile_completion(request):
     if request.method == 'POST':
         house_name = request.POST.get('house_name')
@@ -163,7 +174,7 @@ def profile_completion(request):
         user.postal_code = postal_code
         user.save()
 
-        return redirect('indexcattle')
+        return redirect('indexcattle')  # Redirect to indexcattle view
 
     return render(request, 'user/profile_completion.html')
 
@@ -369,7 +380,16 @@ def user_cattle(request):
             
             if subcategory_id:
                 subcategory = Subcategory.objects.get(id=subcategory_id)
-                cattle = Cattle(
+            elif new_subcategory:
+                subcategory, created = Subcategory.objects.get_or_create(
+                    category=category,
+                    subcategory_name=new_subcategory
+                )
+            else:
+                messages.error(request, 'Please select a breed or enter a new one.')
+                return HttpResponseRedirect(request.path_info)
+
+            cattle = Cattle(
                 user=request.user,
                 category=category,
                 subcategory=subcategory,
@@ -380,18 +400,9 @@ def user_cattle(request):
                 number_of_cattle=number_of_cattle,
                 milk_production=milk_production
             )
-                cattle.save()
-                messages.success(request, 'Cattle added successfully.')
-                return redirect('user_dashboard')
-            elif new_subcategory:
-                subcategory, created = Subcategory.objects.get_or_create(
-                    category=category,
-                    subcategory_name=new_subcategory
-                )
-            else:
-                messages.error(request, 'Please select a breed or enter a new one.')
-                return redirect('user_cattle')
-
+            cattle.save()
+            messages.success(request, 'Cattle added successfully.')
+            return HttpResponseRedirect(reverse('user_dashboard'))
            
         except Category.DoesNotExist:
             messages.error(request, 'Selected category does not exist.')
@@ -399,6 +410,8 @@ def user_cattle(request):
             messages.error(request, 'Selected subcategory does not exist.')
         except Exception as e:
             messages.error(request, f'An error occurred: {str(e)}')
+        
+        return HttpResponseRedirect(request.path_info)
 
     context = {
         'categories': categories,
@@ -407,10 +420,66 @@ def user_cattle(request):
     return render(request, 'user/user_cattle.html', context)
 
 
+
 def get_subcategories(request):
     category_id = request.GET.get('category_id')
-    subcategories = Subcategory.objects.filter(category_id=category_id)
-    return render(request, 'user/subcategory_options.html', {'subcategories': subcategories})
+    subcategories = Subcategory.objects.filter(category_id=category_id, status=1).values('subcategory_id', 'subcategory_name')
+    return JsonResponse({'subcategories': list(subcategories)})
+
+
+def user_productview(request, product_id):
+    cattle = get_object_or_404(Cattle, id=product_id)
+    context = {
+        'cattle': cattle
+    }
+    return render(request, 'user/user_productview.html', context)
+
+def user_productlogview(request, product_id):
+    cattle = get_object_or_404(Cattle, id=product_id)
+    context = {
+        'cattle': cattle
+    }
+    return render(request, 'user/user_productlogview.html', context)
+
+def adminview_cattle(request):
+    cattle = Cattle.objects.all()
+    context = {
+        'cattle': cattle
+    }
+    return render(request, 'admin2/adminview_cattle.html', context)
+
+
+def category_detail(request, category_id):
+    category = get_object_or_404(Category, pk=category_id)
+    subcategories = Subcategory.objects.filter(category=category, status=1)
+    
+    # Fetch cattle details for the given category
+    cattle = Cattle.objects.filter(category=category)
+    
+    context = {
+        'category': category,
+        'subcategories': subcategories,
+        'cattle': cattle,
+    }
+    return render(request, 'user/category_detail.html', context)
+
+def category_detaillog(request, category_id):
+    category = get_object_or_404(Category, pk=category_id)
+    subcategories = Subcategory.objects.filter(category=category, status=1)
+    
+    # Fetch cattle details for the given category
+    cattle = Cattle.objects.filter(category=category)
+    
+    context = {
+        'category': category,
+        'subcategories': subcategories,
+        'cattle': cattle,
+    }
+    return render(request, 'user/category_detaillog.html', context)
+
+
+
+
 
 
 

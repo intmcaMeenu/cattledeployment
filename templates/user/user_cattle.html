@@ -1,136 +1,304 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Cattle</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
         body {
             background-color: #f0f8ff;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Roboto', sans-serif;
+            color: #333;
+            padding-top: 20px;
+            background-image: url('/static/images/cattle_background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
         }
+
         .container {
-            background-color: white;
-            border-radius: 10px;
-            padding: 30px;
-            margin-top: 50px;
-            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 40px;
+            margin-top: 20px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
         }
+
         h2 {
-            color: #5cadd3;
+            color: #2c3e50;
             margin-bottom: 30px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
         }
+
         .form-group label {
-            font-weight: bold;
+            font-weight: 600;
+            color: #34495e;
         }
+
+        .form-control {
+            border-radius: 8px;
+            border: 1px solid #bdc3c7;
+            padding: 10px 15px;
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+
+        .form-control:focus {
+            border-color: #5cadd3;
+            box-shadow: 0 0 0 0.2rem rgba(92, 173, 211, 0.25);
+            background-color: white;
+        }
+
         .btn-primary {
             background-color: #5cadd3;
             border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            width: auto;
+            margin: 0 auto;
+            display: block;
         }
+
         .btn-primary:hover {
-            background-color: #4a9bc0;
+            background-color: #4a8baa;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .custom-file-label::after {
+            content: "Browse";
+        }
+
+        .error-message {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 5px;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
-        <h2 class="text-center">Add Cattle</h2>
-        <form method="POST" action="{% url 'user_cattle' %}"enctype="multipart/form-data">
+        <h2 class="text-center mb-5">Add Cattle</h2>
+        <form method="POST" action="{% url 'user_cattle' %}" enctype="multipart/form-data" id="cattleForm">
             {% csrf_token %}
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="category">Category</label>
-                        <select class="form-control" id="category" name="category" required>
-                            <option value="">Select Category</option>
-                            {% for category in categories %}
-                                <option value="{{ category.id }}">{{ category.category_name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="category">Category</label>
+                    <select class="form-control" id="category" name="category" required>
+                        <option value="">Select Category</option>
+                        {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.category_name }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="subcategory">Breed</label>
-                        <select class="form-control" id="subcategory" name="subcategory" required>
-                            <option value="">Select Subcategory</option>
-                            {% for subcategory in subcategories %}
-                                <option value="{{ subcategory.subcategory_id }}">{{ subcategory.subcategory_name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
+                <div class="form-group col-md-6">
+                    <label for="subcategory">Breed</label>
+                    <select class="form-control" id="subcategory" name="subcategory" required>
+                        <option value="">Select Breed</option>
+                    </select>
                 </div>
             </div>
-            <div class="form-group">
-                <label for="new_subcategory">New Breed (Optional)</label>
-                <input type="text" class="form-control" id="new_subcategory" name="new_subcategory">
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="dob">Date of Birth</label>
-                        <input type="date" class="form-control" id="dob" name="dob" required>
-                    </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="new_subcategory">New Breed (Optional)</label>
+                    <input type="text" class="form-control" id="new_subcategory" name="new_subcategory"
+                        placeholder="Enter new breed if not in the list above" pattern="^[a-zA-Z0-9 ]*$">
+                    <div class="error-message" id="new_subcategory_error"></div>
                 </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="weight">Weight (kg)</label>
-                        <input type="number" step="0.01" class="form-control" id="weight" name="weight" required>
-                    </div>
+                <div class="form-group col-md-6">
+                    <label for="dob">Date of Birth</label>
+                    <input type="date" class="form-control" id="dob" name="dob" required readonly>
+                    <div class="error-message" id="dob_error"></div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="color">Color</label>
-                        <input type="text" class="form-control" id="color" name="color" required>
-                    </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="weight">Weight (kg)</label>
+                    <input type="number" step="0.01" class="form-control" id="weight" name="weight" required
+                        placeholder="Enter weight in kg" min="5" max="1000">
+                    <div class="error-message" id="weight_error"></div>
                 </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="image">Image</label>
-                        <input type="file" class="form-control-file" id="image" name="image" required>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="number_of_cattle">Number of Cattle</label>
-                        <input type="number" class="form-control" id="number_of_cattle" name="number_of_cattle" required>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="milk_production">Daily Milk Production (liters) (Optional)</label>
-                        <input type="number" step="0.01" class="form-control" id="milk_production" name="milk_production">
-                    </div>
+                <div class="form-group col-md-6">
+                    <label for="color">Color</label>
+                    <input type="text" class="form-control" id="color" name="color" required
+                        placeholder="Enter color of the cattle" pattern="^[a-zA-Z ]*$">
+                    <div class="error-message" id="color_error"></div>
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary btn-block mt-4">Submit</button>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="image">Image</label>
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="image" name="image" required accept=".jpg,.jpeg,.png">
+                        <label class="custom-file-label" for="image">Choose file</label>
+                    </div>
+                    <div class="error-message" id="image_error"></div>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="number_of_cattle">Number of Cattle</label>
+                    <input type="number" class="form-control" id="number_of_cattle" name="number_of_cattle" required
+                        placeholder="Enter number of cattle" min="1">
+                    <div class="error-message" id="number_of_cattle_error"></div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="milk_production">Daily Milk Production (liters) (Optional)</label>
+                    <input type="number" step="0.01" class="form-control" id="milk_production" name="milk_production"
+                        placeholder="Enter daily milk production in liters" min="0">
+                    <div class="error-message" id="milk_production_error"></div>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="price">Price</label>
+                    <input type="number" step="0.01" class="form-control" id="price" name="price" required
+                        placeholder="Enter your desired price" min="0">
+                    <div class="error-message" id="price_error"></div>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary mt-4">Submit</button>
         </form>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-        $(document).ready(function() {
-            $('#category').change(function() {
+        $(document).ready(function () {
+            $('#category').change(function () {
                 var categoryId = $(this).val();
-                $.ajax({
-                    url: '/get_subcategories/',  // Replace with your actual URL
-                    data: {
-                        'category_id': categoryId
-                    },
-                    success: function(data) {
-                        $('#subcategory').html(data);
+                if (categoryId) {
+                    $.ajax({
+                        url: '{% url "get_subcategories" %}',
+                        type: 'GET',
+                        data: {
+                            'category_id': categoryId
+                        },
+                        success: function (data) {
+                            $('#subcategory').empty();
+                            $('#subcategory').append('<option value="">Select Breed</option>');
+                            $.each(data.subcategories, function (key, value) {
+                                $('#subcategory').append('<option value="' + value.subcategory_id + '">' + value.subcategory_name + '</option>');
+                            });
+                        }
+                    });
+                } else {
+                    $('#subcategory').empty();
+                    $('#subcategory').append('<option value="">Select Breed</option>');
+                }
+            });
+
+            // New breed validation
+            $('#new_subcategory').on('input', function() {
+                var input = $(this).val();
+                var regex = /^[a-zA-Z0-9 ]*$/;
+                if (!regex.test(input)) {
+                    $('#new_subcategory_error').text('Only alphabets, numbers, and spaces are allowed.');
+                } else {
+                    $('#new_subcategory_error').text('');
+                }
+            });
+
+            // Date of Birth validation
+            var today = new Date();
+            var oneMonthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+            var formattedOneMonthAgo = oneMonthAgo.toISOString().split('T')[0];
+            var formattedToday = today.toISOString().split('T')[0];
+            
+            $('#dob').attr('max', formattedToday);
+            $('#dob').attr('min', formattedOneMonthAgo);
+
+            // Weight validation
+            $('#weight').on('input', function() {
+                var weight = $(this).val();
+                if (weight < 5 || weight > 1000) {
+                    $('#weight_error').text('Weight must be between 5 and 1000 kg.');
+                } else {
+                    $('#weight_error').text('');
+                }
+            });
+
+            // Color validation
+            $('#color').on('input', function() {
+                var input = $(this).val();
+                var regex = /^[a-zA-Z ]*$/;
+                if (!regex.test(input)) {
+                    $('#color_error').text('Only alphabets and spaces are allowed.');
+                } else {
+                    $('#color_error').text('');
+                }
+            });
+
+            // Image validation
+            $('#image').change(function() {
+                var file = this.files[0];
+                var fileType = file.type;
+                var match = ['image/jpeg', 'image/png', 'image/jpg'];
+                if (!((fileType == match[0]) || (fileType == match[1]) || (fileType == match[2]))) {
+                    $('#image_error').text('Please select a valid image file (JPEG/JPG/PNG).');
+                    $(this).val('');
+                    return false;
+                } else {
+                    $('#image_error').text('');
+                }
+            });
+
+            // Number of cattle validation
+            $('#number_of_cattle').on('input', function() {
+                var value = $(this).val();
+                if (value <= 0 || !Number.isInteger(Number(value))) {
+                    $('#number_of_cattle_error').text('Please enter a positive whole number.');
+                } else {
+                    $('#number_of_cattle_error').text('');
+                }
+            });
+
+            // Milk production validation
+            $('#milk_production').on('input', function() {
+                var value = $(this).val();
+                if (value < 0) {
+                    $('#milk_production_error').text('Please enter a non-negative number.');
+                } else {
+                    $('#milk_production_error').text('');
+                }
+            });
+
+            // Price validation
+            $('#price').on('input', function() {
+                var value = $(this).val();
+                if (value < 0) {
+                    $('#price_error').text('Please enter a non-negative number.');
+                } else {
+                    $('#price_error').text('');
+                }
+            });
+
+            // Form submission
+            $('#cattleForm').submit(function() {
+                var hasError = false;
+                $('.error-message').each(function() {
+                    if ($(this).text() !== '') {
+                        hasError = true;
+                        return false;
                     }
                 });
+
+                if (hasError) {
+                    e.preventDefault();
+                    alert('Please correct the errors before submitting.');
+                }
             });
         });
     </script>
 </body>
+
 </html>
