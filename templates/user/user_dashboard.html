@@ -36,6 +36,7 @@
             align-items: center;
             color: #5cadd3; /* Light blue text */
             cursor: pointer;
+            font-size: 18px; /* Increased font size for sidebar items */
         }
         .sidebar-item i {
             margin-right: 10px;
@@ -65,6 +66,14 @@
             display: block;
             padding: 5px 0;
         }
+        a {
+            color: #5cadd3; /* Same color as unvisited links */
+        }
+        
+        /* If you want to change the color on hover or active */
+        a:hover, a:active {
+            color: #0056b3; /* Slightly darker blue for hover */
+        }
     </style>
 </head>
 <body>
@@ -81,12 +90,12 @@
                     </li>
                 
                     <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="fas fa-shopping-cart"></i> Cart</a>
+                        <a class="nav-link" href="#" id="cartLink"><i class="fas fa-shopping-cart"></i> Cart</a>
                     </li>
                    
                 </ul>
             </div>
-        </div>
+        </div>  
     </nav>
 
     <div class="container-fluid">
@@ -104,11 +113,11 @@
                     <a href="{% url 'profile_view' %}" class="load-content"><i class="fas fa-user-circle"></i> Profile View</a>
                     <a href="{% url 'profile_update' %}" class="load-content"><i class="fas fa-user-edit"></i> Profile Update</a>
                 </div>
+                <div class="sidebar-item" id="submittedCattle"><a href="{% url 'fetch_cattle_details' %}" class="load-content"><i class="fas fa-calendar-week"></i> Cattle</a></div>
                 
                 <div class="sidebar-item">
                     <a href="{% url 'logout' %}" style="color: #5cadd3;"><i class="fas fa-sign-out-alt"></i> Logout</a>
-                </div>
-            </div>
+                </div>            </div>
             <div class="col-md-9 col-lg-10 main-content" id="mainContent">
                 <div class="row">
                     <div class="col-md-12">
@@ -150,9 +159,21 @@
                 $('#mainContent').html('<h6>Welcome to Your Dashboard</h6>');
             });
 
+            $('#submittedCattle').click(function() {
+                // Load the cattle details in the main content area
+                $('#mainContent').load("{% url 'fetch_cattle_details' %}");
+            });
+
             // Load dashboard content by default
             $('#dashboard').click();
+
+            // Load cart content in main content area
+            $('#cartLink').click(function() {
+                $('#mainContent').load("{% url 'view_cart' %}");
+            });
         });
+        
     </script>
 </body>
 </html>
+
