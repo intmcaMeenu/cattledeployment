@@ -1,0 +1,127 @@
+{% load static %}
+{% load socialaccount %}
+{% providers_media_js %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Form</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap">
+    <script src="https://kit.fontawesome.com/64d58efce2.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <link href="{% static 'css/login.css' %}" rel="stylesheet">
+    <title>Sign in & Sign up Form</title>
+    
+     <style>
+        .alert {
+        padding: 15px;
+        margin-bottom: 20px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+    }
+    .alert-success {
+        color: #3c763d;
+        background-color: #dff0d8;
+        border-color: #d6e9c6;
+    }
+    .alert-error {
+        color: #a94442;
+        background-color: #f2dede;
+        border-color: #ebccd1;
+    } 
+    .swal-toast-error {
+        background-color: #f2dede !important; /* Light red */
+        color: #a94442 !important; /* Dark red */
+    }
+
+</style>
+
+</head>
+<body>
+    
+    {% if messages %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            {% for message in messages %}
+                Swal.fire({
+                    toast: true,
+                    icon: '{% if message.tags == "success" %}success{% elif message.tags == "error" %}error{% endif %}',
+                    title: '{{ message }}',
+                    animation: false,
+                    position: 'top-right',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    customClass: {
+                        popup: '{% if message.tags == "success" %}swal-toast-success{% elif message.tags == "error" %}swal-toast-error{% endif %}'
+                    },
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer);
+                        toast.addEventListener('mouseleave', Swal.resumeTimer);
+                    }
+                });
+            {% endfor %}
+        });
+    </script>
+    {% endif %}
+
+<body>
+    <div class="container">
+        <div class="panels-container">
+            <div class="panel left-panel">
+                <div class="content">
+                    <h3>New here?</h3>
+                    <p>Log in to continue your journey with us and manage your cattle effortlessly.</p>
+                    <a href="{% url 'register_page' %}">
+                        <button class="btn transparent">Sign up</button>
+                    </a>
+                
+                    <a href="{% url 'index' %}">
+                        <button class="btn transparent">Home</button>
+                    </a>
+                </div>
+                
+                <img src="{% static 'img/logimg.png' %}" class="image" width="100%" height="500px" alt="Image">
+            </div>
+            <div class="panel right-panel">
+                <div class="content1">
+                    <h2 class="title">Login</h2>
+                    <form method="POST" action="{% url 'login_page' %}" class="login-form" id="loginForm">
+                        {% csrf_token %}
+                        <div class="input-field-container">
+                            <div class="input-field">
+                                <i class="fas fa-envelope"></i>
+                                <input type="email" name="email" id="email" placeholder="Email" required>
+                            </div>
+                            <div class="input-field">
+                                <i class="fas fa-lock"></i>
+                                <input type="password" name="password" id="password" placeholder="Password" required>
+                            </div>
+                        </div>
+                        <a href="{% url 'password_reset_request' %}" class="forgot-password">Forgot Password?</a>
+                        <input type="submit" name="submit" class="btn" value="Login">
+                      
+                        <div class="social-media">
+                            <a href="{% provider_login_url 'google' %}">
+                                <button type="button" class="google-btn">
+                
+                                    Sign in with Google
+                                </button>
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

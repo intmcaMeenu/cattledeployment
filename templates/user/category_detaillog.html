@@ -1,0 +1,254 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ category.category_name }} Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="{% static 'css/templatemo-topic-listing.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .navbar {
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+        }
+        .navbar-brand {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            font-size: 24px;
+        }
+        .navbar-nav .nav-link {
+            color: #333;
+            font-weight: 500;
+            padding: 10px 15px;
+            transition: color 0.3s ease;
+            font-size: 18px;  /* Increased size */
+        }
+        .navbar-nav .nav-link:hover {
+            color: #5cadd3;  /* Blue text on hover */
+        }
+        .navbar-nav .nav-link.active {
+            color: #5cadd3;
+            font-weight: 600;
+        }
+        .cattle-container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            padding: 40px;
+            margin-top: 80px;
+            margin-bottom: 80px;
+        }
+        .cattle-card {
+            background-color: #f1f8ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        .cattle-card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-5px);
+        }
+        .cattle-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        .cattle-title {
+            color: #333;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .cattle-details {
+            color: #666;
+            font-size: 14px;
+        }
+        .btn-view-more {
+            background-color: #5cadd3;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 20px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-view-more:hover {
+            background-color: #5cadd3;
+            color: white;
+        }
+        .site-footer {
+            background-color: #ffffff;
+            padding: 15px 0;
+            color: #333;
+            font-family: 'Poppins', sans-serif;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+        }
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .footer-section {
+            flex: 1;
+        }
+        .footer-section h5 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #5cadd3;
+            position: relative;
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+        .footer-section h5::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            height: 2px;
+            background-color: #5cadd3;
+        }
+        .footer-section p {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #666;
+            margin-bottom: 0;
+        }
+        .footer-section:first-child {
+            text-align: left;
+            padding-right: 20px;
+        }
+        .footer-section:last-child {
+            text-align: left;
+            padding-left: 20px;
+        }
+        .scroll-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background-color: #5cadd3;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 50px;
+            font-size: 20px;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        .scroll-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .scroll-to-top:hover {
+            background-color: #4a8baa;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <img src="{% static 'img/icon.png' %}" alt="Cow Icon" style="width: 30px; height: auto;">
+            <a class="navbar-brand" href="{% url 'indexcattle' %}">CattleCare</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}" href="{% url 'indexcattle' %}">Home</a>
+                    </li>
+                    <!-- Add more navigation items as needed -->
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container cattle-container">
+        <h1 class="text-center mb-5">{{ category.category_name }}</h1>
+        <div class="row">
+            {% for cattle in cattle %}
+            <div class="col-md-4 mb-4">
+                <div class="cattle-card">
+                    <img src="{{ cattle.image.url }}" alt="{{ cattle.subcategory.subcategory_name }}" class="cattle-image">
+                    <h3 class="cattle-title">{{ cattle.subcategory.subcategory_name }}</h3>
+                    <div class="cattle-details">
+                        <p><strong>Price:</strong> ₹{{ cattle.price }}</p>
+                        <p><strong>Age:</strong> {{ cattle.dob|timesince }}</p>
+                        <p><strong>Weight:</strong> {{ cattle.weight }} kg</p>
+                        <p><strong>Color:</strong> {{ cattle.color }}</p>
+                        <p><strong>Milk Production:</strong> {{ cattle.milk_production }} liters/day</p>
+                        {% if cattle.status == 3 %}
+                            <p class="text-danger">Sold Out</p>
+                        {% else %}
+                            <p class="text-success">Available</p>
+                        {% endif %}
+                    </div>
+                    <a href="{% url 'user_productlogview' cattle.id %}" class="btn btn-view-more mt-3">View More</a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <p class="text-center">No cattle available in this category.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h5>About CattleCare</h5>
+                    <p>Dedicated to innovative cattle management solutions. We strive to improve livestock health and productivity. Our team of experts is committed to sustainable farming practices.</p>
+                </div>
+                <div class="footer-section">
+                    <h5>Contact</h5>
+                    <p>Email: cattlecare7@gmail.com<br>Phone: +91 9876543210</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scroll to Top Button -->
+    <a href="#" id="scroll-to-top" class="scroll-to-top">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+
+    <!-- JAVASCRIPT FILES -->
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/custom.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        $(document).ready(function() {
+            const scrollToTopBtn = $('#scroll-to-top');
+            $(window).scroll(function() {
+                if ($(this).scrollTop() > 100) {
+                    scrollToTopBtn.addClass('show');
+                } else {
+                    scrollToTopBtn.removeClass('show');
+                }
+            });
+
+            // Add click event for "View More" button
+         
+    </script>
+</body>
+</html>

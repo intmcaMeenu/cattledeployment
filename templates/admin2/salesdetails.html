@@ -1,0 +1,125 @@
+{% extends 'admin2/admin_index.html' %}
+{% load static %}
+{% block content %}
+
+<div class="main-panel">
+    <div class="content">
+        <div class="container-fluid">
+            <h4 class="page-title">Sales Details</h4>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Sales Details</div>
+                            <div class="float-right">
+                                <input type="text" id="salesSearch" class="form-control form-control-sm rounded-pill" placeholder="Search sales..." style="width: 200px;">
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="salesTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Sl No</th>
+                                            <th>Cattle Name</th>
+                                            <th>Seller Details</th>
+                                            <th>Buyer Details</th>
+                                            <th>Amount</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for payment in payments %}
+                                        <tr class="sales-row">
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>{{ payment.cattle.subcategory.subcategory_name }}</td>
+                                            <td>
+                                                <strong>Name:</strong> {{ payment.cattle.user.first_name }} {{ payment.cattle.user.last_name }}<br>
+                                                <strong>House:</strong> {{ payment.cattle.user.house_name }}<br>
+                                                <strong>Contact:</strong> {{ payment.cattle.user.contact }}<br>
+                                                <strong>City:</strong> {{ payment.cattle.user.city }}
+                                            </td>
+                                            <td>
+                                                <strong>Name:</strong> {{ payment.user.first_name }} {{ payment.user.last_name }}<br>
+                                                <strong>House:</strong> {{ payment.user.house_name }}<br>
+                                                <strong>Contact:</strong> {{ payment.user.contact }}<br>
+                                                <strong>City:</strong> {{ payment.user.city }}
+                                            </td>
+                                            <td>{{ payment.amount }}</td>
+                                            <td>{{ payment.payment_date }}</td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="6">No sales found.</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                <div id="noSalesFound" style="display: none; text-align: center; padding: 20px;">
+                                    No data found.
+                                </div>
+                            </div>
+                            <div class="mt-3 text-right" id="totalSalesAmount">
+                                <p><b>Total Sales Amount: ₹{{ total_amount|floatformat:2 }}</b></p>
+                                <p><b>Total in Words: {{ total_in_words }} Rupees Only</b></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('salesSearch');
+    const tableRows = document.querySelectorAll('.sales-row');
+    const noDataFound = document.getElementById('noSalesFound');
+    const totalSalesAmount = document.getElementById('totalSalesAmount');
+
+    let filteredRows = [...tableRows];
+
+    // Function to display the rows that match the search
+    function showRows() {
+        tableRows.forEach(row => row.style.display = 'none');  // Hide all rows initially
+        filteredRows.forEach(row => row.style.display = '');    // Show filtered rows
+
+        if (filteredRows.length === 0) {
+            noDataFound.style.display = 'block';  // Show 'No data found' message if no rows match
+        } else {
+            noDataFound.style.display = 'none';   // Hide the message if rows match
+        }
+    }
+
+    // Function to show or hide total sales amount based on search term
+    function toggleTotalSales() {
+        const searchTerm = searchInput.value.trim();  // Get the search input value
+
+        if (searchTerm === '') {
+            totalSalesAmount.style.display = 'block';  // Show the total sales amount if search is cleared
+        } else {
+            totalSalesAmount.style.display = 'none';   // Hide the total sales amount during search
+        }
+    }
+
+    // Function to filter rows based on search term
+    function filterRows() {
+        const searchTerm = searchInput.value.toLowerCase();  // Convert search input to lowercase
+        filteredRows = [...tableRows].filter(row => 
+            row.textContent.toLowerCase().includes(searchTerm)  // Convert row text to lowercase for case-insensitive comparison
+        );
+        showRows();  // Display the filtered rows
+        toggleTotalSales();  // Show or hide total sales amount based on search term
+    }
+
+    // Add event listener to filter rows on search input change
+    searchInput.addEventListener('input', filterRows);
+
+    // Initially display all rows
+    showRows();
+});
+</script>
+
+{% endblock %}

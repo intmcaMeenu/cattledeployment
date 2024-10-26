@@ -1,0 +1,241 @@
+{% extends 'admin2/admin_index.html' %}
+{% load static %}
+
+{% block content %}
+<div class="main-panel">
+    <div class="content">
+        <div class="container-fluid">
+            <h4 class="page-title">Cattle View</h4>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Registered Cattle</div>
+                            <div class="float-right">
+                                <input type="text" id="cattleSearch" class="form-control form-control-sm rounded-pill" placeholder="Search cattle..." style="width: 200px; border-radius: 50px;">
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table id="cattledatatable" class="display table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Sl No</th>
+                                            <th>Category</th>
+                                            <th>Subcategory</th>
+                                            <th>Price</th>
+                                            <th>Age</th>
+                                            <th>Weight</th>
+                                            <th>Color</th>
+                                            <th>Milk Production</th>
+                                            <th>Description</th>
+                                            <th>Image</th>
+                                            <th>Requested By</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for cattle in cattle %}
+                                        <tr class="cattle-row">
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>{{ cattle.category.category_name }}</td>
+                                            <td>{{ cattle.subcategory.subcategory_name }}</td>
+                                            <td>₹{{ cattle.price }}</td>
+                                            <td>{{ cattle.dob|timesince }}</td>
+                                            <td>{{ cattle.weight }} kg</td>
+                                            <td>{{ cattle.color }}</td>
+                                            <td>{{ cattle.milk_production }} liters/day</td>
+                                            <td>
+                                                <div class="description-container">
+                                                    <span class="description-short">{{ cattle.description|truncatewords:10 }}</span>
+                                                    <span class="description-full" style="display:none;">{{ cattle.description }}</span>
+                                                    <a href="#" class="read-more" onclick="toggleDescription(this)">Read more</a>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <img src="{{ cattle.image.url }}" alt="{{ cattle.subcategory.subcategory_name }}" style="width: 100px; height: auto; border-radius: 10px;">
+                                            </td>
+                                            <td>
+                                                <strong>{{ cattle.user.first_name }} {{ cattle.user.last_name }}</strong><br>
+                                                
+                                                Contact: {{ cattle.user.contact }}<br>
+                                                City: {{ cattle.user.city }}
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-status" data-cattle-id="{{ cattle.id }}" data-status="{{ cattle.status }}" data-reject-message="{{ cattle.reject_message }}" onclick="updateStatus(this)">
+                                                    {% if cattle.status == 0 %}
+                                                        <span class="btn btn-primary">Pending</span>
+                                                    {% elif cattle.status == 1 %}
+                                                        <span class="btn btn-success">Approved</span>
+                                                    {% elif cattle.status == 2 %}
+                                                        <span class="btn btn-danger">Rejected</span>
+                                                    {% elif cattle.status == 3 %}
+                                                        <span class="btn btn-warning">Sold Out</span>
+                                                    {% endif %}
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                <div id="noDataFound" style="display: none; text-align: center; padding: 20px;">
+                                    No data found.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1" role="dialog" aria-labelledby="rejectModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rejectModalLabel">Reject Cattle</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="rejectForm">
+                    <div class="form-group">
+                        <label for="rejectMessage">Reason for rejection:</label>
+                        <textarea class="form-control" id="rejectMessage" rows="3" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" id="confirmReject">Confirm Reject</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Rejection Reason Modal -->
+<div class="modal fade" id="rejectionReasonModal" tabindex="-1" role="dialog" aria-labelledby="rejectionReasonModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rejectionReasonModalLabel">Rejection Reason</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="rejectionReasonText"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+function updateStatus(button) {
+    const cattleId = button.getAttribute('data-cattle-id');
+    let currentStatus = parseInt(button.getAttribute('data-status'));
+    let rejectMessage = button.getAttribute('data-reject-message');
+
+    if (currentStatus === 0) {
+        sendStatusUpdate(cattleId, 1);
+    } else if (currentStatus === 1) {
+        $('#rejectModal').modal('show');
+        $('#confirmReject').attr('data-cattle-id', cattleId);
+    } else if (currentStatus === 2) {
+        $('#rejectionReasonText').text(rejectMessage || 'No reason provided.');
+        $('#rejectionReasonModal').modal('show');
+    }
+}
+
+function sendStatusUpdate(cattleId, newStatus, rejectMessage = '') {
+    $.ajax({
+        url: `/update-cattle-status/${cattleId}/`,
+        method: 'POST',
+        data: {
+            status: newStatus,
+            reject_message: rejectMessage,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        },
+        success: function(response) {
+            if (response.status === 'success') {
+                const button = document.querySelector(`button[data-cattle-id="${cattleId}"]`);
+                button.setAttribute('data-status', newStatus);
+                const statusText = ['Pending', 'Approved', 'Rejected', 'Sold Out'][newStatus];
+                const statusClass = ['btn-primary', 'btn-success', 'btn-danger', 'btn-warning'][newStatus];
+                button.innerHTML = `<span class="btn ${statusClass}">${statusText}</span>`;
+                
+                if (newStatus === 2) {
+                    button.setAttribute('data-reject-message', rejectMessage);
+                }
+                
+                if (newStatus === 2 || newStatus === 3) {
+                    button.disabled = true;
+                }
+            } else {
+                alert(response.message || 'An error occurred while updating the status.');
+            }
+        },
+        error: function(xhr) {
+            alert(xhr.responseJSON.message || 'An error occurred. Please try again.');
+        }
+    });
+}
+
+$('#confirmReject').click(function() {
+    const cattleId = $(this).attr('data-cattle-id');
+    const rejectMessage = $('#rejectMessage').val();
+    if (!rejectMessage) {
+        alert('Please provide a reason for rejection.');
+        return;
+    }
+    sendStatusUpdate(cattleId, 2, rejectMessage);
+    $('#rejectModal').modal('hide');
+});
+
+function toggleDescription(element) {
+    const container = element.closest('.description-container');
+    const shortDesc = container.querySelector('.description-short');
+    const fullDesc = container.querySelector('.description-full');
+    
+    if (shortDesc.style.display !== 'none') {
+        shortDesc.style.display = 'none';
+        fullDesc.style.display = 'inline';
+        element.textContent = 'Read less';
+    } else {
+        shortDesc.style.display = 'inline';
+        fullDesc.style.display = 'none';
+        element.textContent = 'Read more';
+    }
+}
+
+$(document).ready(function() {
+    $('#cattledatatable').DataTable({
+        "pageLength": 10,
+        "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
+    });
+
+    $('#cattleSearch').on('keyup', function() {
+        $('#cattledatatable').DataTable().search(this.value).draw();
+    });
+});
+</script>
+
+<style>
+.btn-status {
+    padding: 0;
+    border: none;
+    background: none;
+}
+.btn-status .btn {
+    width: 100px;
+}
+</style>
+
+{% endblock %}

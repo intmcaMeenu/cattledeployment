@@ -1,0 +1,340 @@
+{% extends 'admin2/admin_index.html' %}
+{% load static %}
+{% block content %}
+<div class="main-panel">
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Vaccination Centers</div>
+                            <button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#addVaccinationCenterModal">
+                                Add Vaccination Center
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="vaccinationCenterTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Sl No</th>
+                                            <th>Center Name</th>
+                                            <th>Email</th>
+                                            <th>Place</th>
+                                            <th>Contact Number</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for center in vaccination_centers %}
+                                        <tr>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>{{ center.center_name }}</td>
+                                            <td>{{ center.center_email }}</td>
+                                            {% if center.place is None %}
+                                            <td>Profile not completed</td>
+                                            {% else %}
+                                            <td>{{ center.place }}</td>
+                                            {% endif %}
+                                            {% if center.contact_number is None %}
+                                            <td>Profile not completed</td>
+                                            {% else %}
+                                            
+                                            <td>{{ center.contact_number }}</td>
+                                            {% endif %}
+                                            <td>
+                                               
+                                                <form action="{% url 'toggle_vaccination_center' center.center_id %}" method="post">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn {% if center.status %}btn-success{% else %}btn-danger{% endif %} toggle-btn">
+                                                        {% if center.status %}Activate{% else %}Deactivate{% endif %}
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="6">No vaccination centers found.</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Add Vaccination Center Modal -->
+<div class="modal fade" id="addVaccinationCenterModal" tabindex="-1" role="dialog" aria-labelledby="addVaccinationCenterModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addVaccinationCenterModalLabel">Add Vaccination Center</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'vaccination_center' %}" id="vaccinationCenterForm" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="center_name">Center Name</label>
+                        <input type="text" class="form-control" id="center_name" name="center_name" required>
+                        <small id="centerError" class="form-text text-danger" style="display: none;"></small>
+                    </div>
+                    <div class="form-group">
+                        <label for="center_email">Center Email</label>
+                        <input type="email" class="form-control" id="center_email" name="center_email" required>
+                        <small id="emailError" class="form-text text-danger" style="display: none;"></small>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm_password">Confirm Password</label>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                        <small id="passwordError" class="form-text text-danger" style="display: none;"></small>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="addVaccinationCenterBtn">Add Vaccination Center</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('vaccinationCenterForm');
+    const centerInput = document.getElementById('center_name');
+    const errorElement = document.getElementById('centerError');
+    const emailInput = document.getElementById('center_email');
+    const emailErrorElement = document.getElementById('emailError');
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirm_password');
+    const passwordErrorElement = document.getElementById('passwordError');
+    const editForm = document.getElementById('editVaccinationCenterForm');
+    const editCenterInput = document.getElementById('edit_center_name');
+    const editErrorElement = document.getElementById('editCenterError');
+    const editEmailInput = document.getElementById('edit_center_email');
+    const editEmailErrorElement = document.getElementById('editEmailError');
+    const editPasswordInput = document.getElementById('edit_password');
+    const editConfirmPasswordInput = document.getElementById('edit_confirm_password');
+    const editPasswordErrorElement = document.getElementById('editPasswordError');
+    const existingCenters = [{% for center in vaccination_centers %}'{{ center.center_name|lower }}',{% endfor %}];
+
+    function validateCenter(value, currentId = null) {
+        const regex = /^[A-Za-z\s]+$/;
+        if (!regex.test(value)) {
+            return 'Center name can only contain letters and spaces.';
+        }
+        const lowercaseValue = value.toLowerCase().trim();
+        const existingCenter = existingCenters.find(cat => cat === lowercaseValue);
+        if (existingCenter && (!currentId || lowercaseValue !== document.querySelector(`[data-id="${currentId}"]`).dataset.name.toLowerCase().trim())) {
+            return `The center "${value}" already exists.`;
+        }
+        return '';
+    }
+
+    function validateEmail(email) {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!regex.test(email)) {
+            return 'Invalid email format.';
+        }
+        return '';
+    }
+
+    function validatePassword(password, confirmPassword) {
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/;
+        if (!passwordRegex.test(password)) {
+            return 'Password: 6+ chars, 1 letter, 1 number, 1 special char';
+        }
+        if (password !== confirmPassword) {
+            return 'Passwords do not match.';
+        }
+        return '';
+    }
+
+    function setupValidation(input, errorElement, emailInput, emailErrorElement) {
+        input.addEventListener('input', function() {
+            const error = validateCenter(this.value);
+            if (error) {
+                this.style.borderColor = 'red';
+                errorElement.textContent = error;
+                errorElement.style.display = 'block';
+                document.getElementById('addVaccinationCenterBtn').disabled = true;
+            } else {
+                this.style.borderColor = 'green';
+                errorElement.style.display = 'none';
+                document.getElementById('addVaccinationCenterBtn').disabled = false;
+            }
+        });
+
+        emailInput.addEventListener('input', function() {
+            const error = validateEmail(this.value);
+            if (error) {
+                this.style.borderColor = 'red';
+                emailErrorElement.textContent = error;
+                emailErrorElement.style.display = 'block';
+                document.getElementById('addVaccinationCenterBtn').disabled = true;
+            } else {
+                this.style.borderColor = 'green';
+                emailErrorElement.style.display = 'none';
+                document.getElementById('addVaccinationCenterBtn').disabled = false;
+            }
+        });
+    }
+
+    function setupPasswordValidation(passwordInput, confirmPasswordInput, errorElement) {
+        passwordInput.addEventListener('input', function() {
+            const error = validatePassword(this.value, confirmPasswordInput.value);
+            if (error) {
+                this.style.borderColor = 'red';
+                confirmPasswordInput.style.borderColor = 'red';
+                errorElement.textContent = error;
+                errorElement.style.display = 'block';
+                document.getElementById('addVaccinationCenterBtn').disabled = true;
+            } else {
+                this.style.borderColor = 'green';
+                confirmPasswordInput.style.borderColor = 'green';
+                errorElement.style.display = 'none';
+                document.getElementById('addVaccinationCenterBtn').disabled = false;
+            }
+        });
+
+        confirmPasswordInput.addEventListener('input', function() {
+            const error = validatePassword(passwordInput.value, this.value);
+            if (error) {
+                passwordInput.style.borderColor = 'red';
+                this.style.borderColor = 'red';
+                errorElement.textContent = error;
+                errorElement.style.display = 'block';
+                document.getElementById('addVaccinationCenterBtn').disabled = true;
+            } else {
+                passwordInput.style.borderColor = 'green';
+                this.style.borderColor = 'green';
+                errorElement.style.display = 'none';
+                document.getElementById('addVaccinationCenterBtn').disabled = false;
+            }
+        });
+    }
+
+    setupValidation(centerInput, errorElement, emailInput, emailErrorElement);
+    setupPasswordValidation(passwordInput, confirmPasswordInput, passwordErrorElement);
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const centerName = centerInput.value.trim();
+        const centerError = validateCenter(centerName);
+
+        if (centerError) {
+            errorElement.textContent = centerError;
+            errorElement.style.display = centerError ? 'block' : 'none';
+            return;
+        }
+
+        const email = emailInput.value;
+        const emailError = validateEmail(email);
+
+        if (emailError) {
+            emailErrorElement.textContent = emailError;
+            emailErrorElement.style.display = emailError ? 'block' : 'none';
+            return;
+        }
+
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        const passwordError = validatePassword(password, confirmPassword);
+
+        if (passwordError) {
+            passwordErrorElement.textContent = passwordError;
+            passwordErrorElement.style.display = passwordError ? 'block' : 'none';
+            return;
+        }
+
+        this.submit();
+    });
+
+    const editButtons = document.querySelectorAll('.edit-btn');
+    editButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const centerId = this.dataset.id;
+            const centerName = this.dataset.name;
+
+            document.getElementById('edit_center_id').value = centerId;
+            editCenterInput.value = centerName;
+            $('#editVaccinationCenterModal').modal('show');
+        });
+    });
+
+    setupValidation(editCenterInput, editErrorElement, editEmailInput, editEmailErrorElement);
+    setupPasswordValidation(editPasswordInput, editConfirmPasswordInput, editPasswordErrorElement);
+
+    editForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const centerName = editCenterInput.value.trim();
+        const centerError = validateCenter(centerName, document.getElementById('edit_center_id').value);
+
+        if (centerError) {
+            editErrorElement.textContent = centerError;
+            editErrorElement.style.display = centerError ? 'block' : 'none';
+            return;
+        }
+
+        const email = editEmailInput.value;
+        const emailError = validateEmail(email);
+
+        if (emailError) {
+            editEmailErrorElement.textContent = emailError;
+            editEmailErrorElement.style.display = emailError ? 'block' : 'none';
+            return;
+        }
+
+        const password = editPasswordInput.value;
+        const confirmPassword = editConfirmPasswordInput.value;
+        const passwordError = validatePassword(password, confirmPassword);
+
+        if (passwordError) {
+            editPasswordErrorElement.textContent = passwordError;
+            editPasswordErrorElement.style.display = passwordError ? 'block' : 'none';
+            return;
+        }
+
+        const url = this.getAttribute('action');
+        const formData = new FormData(this);
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                $('#editVaccinationCenterModal').modal('hide');
+                window.location.href = '{% url "vaccination_center" %}';
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', status, error);
+                console.log('Response:', xhr.responseText);
+                $('#editVaccinationCenterModal').modal('hide');
+                window.location.href = '{% url "vaccination_center" %}';
+            }
+        });
+    });
+
+    const deleteButtons = document.querySelectorAll('.delete-btn');
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const centerId = this.dataset.id;
+            
+            $('#deleteVaccinationCenterModal').modal('show');
+        });
+    });
+});
+</script>
+{% endblock %}
+<td>{{ center.place }}</td>

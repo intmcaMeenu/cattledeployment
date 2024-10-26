@@ -1,0 +1,196 @@
+{% load static %} 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Cart</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f5f5f5; /* Lighter background */
+            font-family: 'Roboto', sans-serif; /* Change font */
+            padding: 20px;
+        }
+        h1 {
+            color: #2874f0; /* Flipkart header color */
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px; /* Increased font size */
+        }
+        .shopping-cart {
+            background-color: #ffffff; /* White background for cart */
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 80%; /* Increased width of the shopping cart */
+            margin: auto; /* Center the cart */
+        }
+        .product {
+            display: flex;
+            align-items: flex-start; /* Align items to the start (top) */
+            justify-content: flex-start; /* Align items to the left */
+            padding: 15px;
+            border: 1px solid #e0e0e0; /* Light border */
+            border-radius: 5px;
+            margin-bottom: 15px;
+            background-color: #f9f9f9; /* Light gray background for products */
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Shadow for product cards */
+            width: 90%; /* Increased width of the product items */
+        }
+        .product img {
+            width: 100px; /* Adjust image size */
+            border-radius: 5px;
+            margin-right: 15px; /* Space between image and text */
+        }
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+        }
+        .quantity-controls button {
+            margin: 0 5px;
+            background-color: #f0f0f0; /* Light button background */
+            border: 1px solid #ccc; /* Border for buttons */
+            border-radius: 5px;
+            padding: 5px 10px;
+        }
+        .remove-button {
+            background-color: #ff0000; /* Bright red for remove button */
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .remove-button:hover {
+            background-color: #cc0000; /* Darker red on hover */
+        }
+        .totals {
+            text-align: right;
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 18px; /* Increased font size */
+        }
+        .checkout-button {
+            background-color: #2874f0; /* Flipkart primary color */
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-size: 16px; /* Increased font size */
+        }
+        .checkout-button:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+        }
+        .product > div {
+            flex: 1; /* Allow each column to take equal space */
+            text-align: left; /* Align text to the left */
+        }
+        .description {
+            text-align: left; /* Align text to the left */
+            position: relative; /* Position for the Read More link */
+        }
+        .short-description {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 4; /* Limit to 4 lines */
+            overflow: hidden;
+            text-overflow: ellipsis; /* Add ellipsis for overflow */
+        }
+        .full-description {
+            display: none; /* Initially hide the full description */
+        }
+    </style>
+</head>
+<body>
+   <!-- Title for the cart page -->
+    <div class="shopping-cart">
+        <b><h1>My Cart</h1></b>
+        {% if items %}
+            <div class="product">
+                <div><strong>Sl. No.</strong></div>
+                <div><strong>Image</strong></div>
+                <div><strong>Product Name</strong></div>
+                <div><strong>Description</strong></div>
+                <div><strong>Price</strong></div>
+                <div><strong>Action</strong></div>
+            </div>
+            {% for item in items %}
+            <div class="product" data-id="{{ item.id }}"> <!-- Add data-id for the item -->
+                <div>{{ forloop.counter }}</div> <!-- Serial Number -->
+                <img src="{{ item.cattle.image.url }}" alt="{{ item.product.product_name }}" style="width: 100px; border-radius: 5px;"> <!-- Product Image -->
+                <div>{{ item.cattle.subcategory.subcategory_name }}</div> <!-- Product Name -->
+                <div class="description">
+                    <span class="short-description">{{ item.cattle.description|truncatewords:20 }}</span> <!-- Short description -->
+                    <span class="full-description" style="display: none;">{{ item.cattle.description }}</span> <!-- Full description -->
+                    <a href="#" class="toggle-description">Read More</a> <!-- Read More link -->
+                </div>
+               
+                <div>₹{{ item.cattle.price }}</div>
+                <button class="remove-button" data-id="{{ item.id }}">Remove</button> <!-- Pass item ID -->
+            </div>
+            {% endfor %}
+            <div class="totals">
+                <div>Total: ₹{{ total_price }}</div>
+                <button class="checkout-button" onclick="window.location.href='{% url 'payment' %}?amount={{ total_price }}'">Proceed to Checkout</button>
+            </div>
+        {% else %}
+            <p class="text-center">Your cart is empty.</p>
+           
+        {% endif %}
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // JavaScript for handling quantity changes and removing items
+        $(document).ready(function() {
+            $('.remove-button').click(function() {
+                var itemId = $(this).data('id'); // Get the item ID
+                var $product = $(this).closest('.product'); // Get the product div
+
+                // AJAX call to remove item
+                $.ajax({
+                    url: '/cart/remove/' + itemId + '/', // Corrected URL to remove item
+                    type: 'POST',
+                    data: {
+                        'csrfmiddlewaretoken': '{{ csrf_token }}' // Include CSRF token for security
+                    },
+                    success: function(response) {
+                        // On success, remove the product from the cart
+                        $product.remove();
+                        $('#total-price').text('Total: ₹' + response.total_price); // Update total price
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle error
+                        alert('Error removing item. Please try again.');
+                    }
+                });
+            });
+
+            $('.quantity-controls input').change(function() {
+                // Update quantity and recalculate totals
+            });
+
+            $('.toggle-description').click(function(e) {
+                e.preventDefault(); // Prevent default link behavior
+                var $this = $(this);
+                var $fullDescription = $this.siblings('.full-description');
+                var $shortDescription = $this.siblings('.short-description');
+
+                if ($fullDescription.is(':visible')) {
+                    $fullDescription.hide();
+                    $shortDescription.show();
+                    $this.text('Read More');
+                } else {
+                    $fullDescription.show();
+                    $shortDescription.hide();
+                    $this.text('Read Less');
+                }
+            });
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

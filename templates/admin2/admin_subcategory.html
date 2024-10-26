@@ -1,0 +1,299 @@
+{% extends 'admin2/admin_index.html' %}
+{% load static %}
+
+{% block content %}
+<div class="main-panel">
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row justify-content-center">
+                <div class="col-md-12">
+                    <h4 class="page-title">Sub Categories Management</h4>  
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h3 class="card-title">Subcategories</h3>
+                            <div class="card-tools">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <input type="text" id="subcategorySearch" class="form-control form-control-sm rounded-pill" placeholder="Search subcategories..." style="width: 200px; border-radius: 50px;">
+                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addSubcategoryModal" style="margin-left: 15px;" >
+                                        Add Subcategory
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped" id="subcategoryTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Sl. No.</th>
+                                            <th>Category Name</th>
+                                            <th>Subcategory Name</th>
+                                            
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for subcategory in subcategories %}
+                                        <tr class="subcategory-row">
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>{{ subcategory.category.category_name }}</td>
+                                            <td>{{ subcategory.subcategory_name }}</td>
+                                            
+                                            <td>
+                                                <button class="btn btn-sm btn-primary edit-btn" data-toggle="modal" data-target="#editSubcategoryModal{{ subcategory.subcategory_id }}">Edit</button>
+                                                
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                <div id="noSubcategoryFound" style="display: none; text-align: center; padding: 20px;">
+                                    No data found.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Subcategory Modal -->
+<div class="modal fade" id="addSubcategoryModal" tabindex="-1" role="dialog" aria-labelledby="addSubcategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addSubcategoryModalLabel">Add Subcategory</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{% url 'admin_subcategory' %}" method="POST" id="addSubcategoryForm">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <select class="form-control" id="category" name="category" required>
+                            <option value="">Select a category</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.category_name }}</option>
+                            {% endfor %}
+                        </select>
+                        <small id="categoryError" class="form-text text-danger" style="display: none;"></small>
+                    </div>
+                    <div class="form-group">
+                        <label for="subcategory_name">Subcategory Name</label>
+                        <input type="text" class="form-control" id="subcategory_name" name="subcategory_name" required>
+                        <small id="subcategoryNameError" class="form-text text-danger" style="display: none;"></small>
+                    </div>
+                   
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" id="addSubcategoryBtn">Add Subcategory</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% for subcategory in subcategories %}
+<!-- Edit Subcategory Modal -->
+<div class="modal fade" id="editSubcategoryModal{{ subcategory.subcategory_id }}" tabindex="-1" role="dialog" aria-labelledby="editSubcategoryModalLabel{{ subcategory.subcategory_id }}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editSubcategoryModalLabel{{ subcategory.subcategory_id }}">Edit Subcategory</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{% url 'subcategory_edit' %}" method="POST" class="editSubcategoryForm">
+                {% csrf_token %}
+                <input type="hidden" name="subcategory_id" value="{{ subcategory.subcategory_id }}">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <select class="form-control" id="edit_category_{{ subcategory.subcategory_id }}" name="category" required>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}" {% if category.id == subcategory.category.id %}selected{% endif %}>{{ category.category_name }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="form-text text-danger categoryError" style="display: none;"></small>
+                    </div>
+                    <div class="form-group">
+                        <label for="subcategory_name">Subcategory Name</label>
+                        <input type="text" class="form-control subcategory_name" id="edit_subcategory_name_{{ subcategory.subcategory_id }}" name="subcategory_name" value="{{ subcategory.subcategory_name }}" required>
+                        <small class="form-text text-danger subcategoryNameError" style="display: none;"></small>
+                    </div>
+                    
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Update Subcategory</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteSubcategoryModal" tabindex="-1" role="dialog" aria-labelledby="deleteSubcategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteSubcategoryModalLabel">Confirm Delete</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this subcategory?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <a href="#" id="confirmDelete" class="btn btn-danger">Delete</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const addForm = document.getElementById('addSubcategoryForm');
+    const categoryInput = document.getElementById('category');
+    const subcategoryNameInput = document.getElementById('subcategory_name');
+    
+    const categoryError = document.getElementById('categoryError');
+    const subcategoryNameError = document.getElementById('subcategoryNameError');
+    
+    const addSubcategoryBtn = document.getElementById('addSubcategoryBtn');
+    const subcategorySearchInput = document.getElementById('subcategorySearch');
+    
+    function validateSubcategory(value, categoryId) {
+        const regex = /^[A-Za-z0-9\s]+$/;
+        if (!regex.test(value)) {
+            return 'Subcategory name can only contain letters numbers and spaces.';
+        }
+        // You might want to add a check for existing subcategories here
+        return '';
+    }
+
+   
+
+    function setupValidation(form, categoryInput, subcategoryNameInput,  categoryError, subcategoryNameError) {
+        subcategoryNameInput.addEventListener('input', function() {
+            const error = validateSubcategory(this.value, categoryInput.value);
+            if (error) {
+                this.style.borderColor = 'red';
+                subcategoryNameError.textContent = error;
+                subcategoryNameError.style.display = 'block';
+                addSubcategoryBtn.disabled = true;
+            } else {
+                this.style.borderColor = 'green';
+                subcategoryNameError.style.display = 'none';
+                addSubcategoryBtn.disabled = false;
+            }
+        });
+
+       
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const categoryValue = categoryInput.value.trim();
+            const subcategoryNameValue = subcategoryNameInput.value.trim();
+            
+
+            let isValid = true;
+
+            if (categoryValue === "") {
+                categoryError.textContent = 'Please select a category';
+                categoryError.style.display = 'block';
+                isValid = false;
+            } else {
+                categoryError.style.display = 'none';
+            }
+
+            const subcategoryNameErrorMsg = validateSubcategory(subcategoryNameValue, categoryValue);
+            if (subcategoryNameErrorMsg) {
+                subcategoryNameError.textContent = subcategoryNameErrorMsg;
+                subcategoryNameError.style.display = 'block';
+                isValid = false;
+            } else {
+                subcategoryNameError.style.display = 'none';
+            }
+
+            
+
+            if (isValid) {
+                this.submit();
+            }
+        });
+    }
+
+    setupValidation(addForm, categoryInput, subcategoryNameInput, categoryError, subcategoryNameError);
+
+    document.querySelectorAll('.editSubcategoryForm').forEach(form => {
+        const subcategoryId = form.querySelector('input[name="subcategory_id"]').value;
+        const editCategoryInput = form.querySelector(`#edit_category_${subcategoryId}`);
+        const editSubcategoryNameInput = form.querySelector(`#edit_subcategory_name_${subcategoryId}`);
+        
+        const editCategoryError = form.querySelector('.categoryError');
+        const editSubcategoryNameError = form.querySelector('.subcategoryNameError');
+       
+
+        setupValidation(form, editCategoryInput, editSubcategoryNameInput, editCategoryError, editSubcategoryNameError);
+    });
+
+    const deleteButtons = document.querySelectorAll('.delete-btn');
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const subcategoryId = this.dataset.id;
+            $('#confirmDelete').attr('href', `{% url 'subcategory_delete' %}?id=${subcategoryId}`);
+            $('#deleteSubcategoryModal').modal('show');
+        });
+    });
+   
+});
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('subcategorySearch');
+    const tableRows = document.querySelectorAll('.subcategory-row');
+    const noDataFound = document.getElementById('noSubcategoryFound');
+
+    let filteredRows = [...tableRows];
+
+    function showRows() {
+        tableRows.forEach(row => row.style.display = 'none');
+        filteredRows.forEach(row => row.style.display = '');
+
+        if (filteredRows.length === 0) {
+            noDataFound.style.display = 'block';
+        } else {
+            noDataFound.style.display = 'none';
+        }
+    }
+
+    function filterRows() {
+        const searchTerm = searchInput.value.toLowerCase();
+        filteredRows = [...tableRows].filter(row => 
+            row.textContent.toLowerCase().includes(searchTerm)
+        );
+        showRows();
+    }
+
+    searchInput.addEventListener('input', filterRows);
+
+    showRows();
+});
+</script>
+
+<style>
+    .btn-sm {
+        width: 60px;  /* Set a fixed width for both buttons */
+    }
+</style>
+
+{% endblock %}
