@@ -25,14 +25,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('cattle_app.urls')),
     path('', index, name='index'),
-    path('user/', include('cattle_app.urls')),
+    
     path('accounts/', include('allauth.urls')),
 
-    path('admin/', admin.site.urls),
-    path('', include('cattle_app.urls')),
-    path('', index, name='index'),
-    path('user/', include('cattle_app.urls')),
-    path('accounts/', include('allauth.urls')),
+    
 ]
 
 if settings.DEBUG:
