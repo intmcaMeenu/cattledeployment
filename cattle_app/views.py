@@ -1024,71 +1024,12 @@ def image_processing(request):
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import numpy as np
-import cv2
 from django.core.files.uploadedfile import InMemoryUploadedFile
 import os
 from django.conf import settings
 from django.core.files.storage import default_storage
 
-# Load Haar Cascade for face detection
-face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
-@csrf_exempt
-def validate_image(request):
-    if request.method == 'POST' and 'file1' in request.FILES:
-        # Get the uploaded file
-        uploaded_file: InMemoryUploadedFile = request.FILES['file1']
-        file_name = uploaded_file.name  # Get the original file name
-
-        # Convert the uploaded file to an image
-        file_bytes = np.frombuffer(uploaded_file.read(), np.uint8)
-        img = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
-        
-        if img is None:
-            return JsonResponse({"status": "error", "message": "Unable to read the image."})
-
-        # Convert the image to grayscale (required for Haar Cascade)
-        gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-        # Detect faces in the image
-        faces = face_cascade.detectMultiScale(
-            gray_img, 
-            scaleFactor=1.2, 
-            minNeighbors=6, 
-            minSize=(50, 50)
-        )
-
-        # Save the image with detected faces
-
-        output_image_path = os.path.join(settings.BASE_DIR, 'static', 'media', uploaded_file.name)  # Save to the media directory
-        if len(faces) > 0:
-            # Draw rectangles around the detected faces
-            for (x, y, w, h) in faces:
-                cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
-            
-            # Save the image to the media directory
-            default_storage.save('detected_faces.jpg', uploaded_file)
-            cv2.imwrite(output_image_path, img)
-
-            # Construct the URL for the image
-            image_url = os.path.join( '/static', 'media', uploaded_file.name)
-
-
-            return JsonResponse({
-                "status": "success",
-                "message": f"Detected {len(faces)} face(s) in the image.",
-                "image_url": image_url,
-                "file_name": file_name
-            })
-        else:
-            default_storage.save('detected_faces.jpg', uploaded_file)
-            cv2.imwrite(output_image_path, img)
-            image_url = os.path.join( '/static', 'media', uploaded_file.name)
-
-            return JsonResponse({"status": "error", "message": "No human face detected in the image.",
-                                   "image_url": image_url,})
-
-    return JsonResponse({"status": "error", "message": "Invalid request."})
 
 def upload_image(request):
     if request.method == 'POST' and request.FILES['file1']:

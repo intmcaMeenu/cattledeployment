@@ -53,7 +53,7 @@ urlpatterns = [
     path('payment/', views.payment, name='payment'),
     path('save_payment/', views.save_payment, name='save_payment'),
     path('payment_details/', views.payment_details, name='payment_details'),
-    path('image_processing/', views.image_processing, name='image_processing'),
+    
     path('vaccination_center_dashboard/', views.vaccination_center_dashboard, name='vaccination_center_dashboard'),
     path('vaccination_center_logout/', views.vaccination_center_logout, name='vaccination_center_logout'),
     path('add_vaccine/', views.add_vaccine, name='add_vaccine'),
