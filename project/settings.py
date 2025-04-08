@@ -86,11 +86,11 @@ WSGI_APPLICATION = 'project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'cattlecare_roarrealmy',
-        'USER': 'cattlecare_roarrealmy',
-        'PASSWORD': '07427b8ea8926bd25780dab1ad2fcfa228af65da',
-        'HOST': 'msdeb.h.filess.io',
-        'PORT': '3305',
+        'NAME': 'cattlecare_chargebear',
+        'USER': 'cattlecare_chargebear',
+        'PASSWORD': 'e38bbaeb71770e54d617c32799d314cc1b0b3b06',
+        'HOST': 'y3ehi.h.filess.io',
+        'PORT': '61000',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         }
