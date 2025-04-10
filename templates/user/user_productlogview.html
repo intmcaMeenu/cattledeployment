@@ -167,13 +167,7 @@
             background-color: #4a8baa;
         }
     </style>
-    <script>
-        // Disable browser back button
-        history.pushState(null, null, location.href);
-        window.onpopstate = function () {
-            history.go(1);
-        };
-    </script>
+    
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light fixed-top">
@@ -207,21 +201,59 @@
                 <p><strong>Age:</strong> {{ cattle.dob|timesince }}</p>
                 <p><strong>Weight:</strong> {{ cattle.weight }} kg</p>
                 <p><strong>Color:</strong> {{ cattle.color }}</p>
-                <p><strong>Number of Cattle:</strong> {{ cattle.number_of_cattle }}</p>
                 <p><strong>Milk Production:</strong> {{ cattle.milk_production }} liters/day</p>
+                <p><strong>Seller Details:</strong> {{ cattle.user.first_name }} {{ cattle.user.last_name }} <i class="fas fa-eye" data-bs-toggle="modal" data-bs-target="#ownerDetailsModal" style="cursor: pointer;"></i></p>
                 
                 <div class="d-flex align-items-center mt-5">
-                    <button class="btn btn-custom me-3">Add to Cart</button>
-                    <button class="btn btn-success me-3">Buy Now</button>
+                    {% if cattle.status == 3 %}
+                        <span class="text-danger me-3">This item is sold out</span>
+                        <button class="btn btn-custom me-3" disabled>Add to Cart</button>
+                        <button class="btn btn-success me-3" disabled>Buy Now</button>
+                        <i class="wishlist-icon far fa-heart me-3" style="color: gray; cursor: not-allowed;"></i>
+                    {% elif is_owner %}
+                        <span class="text-warning me-3">This is your own cattle listing</span>
+                    {% else %}
+                        <button class="btn btn-custom me-3" onclick="redirectToDashboard(event)">Add to Cart</button>
+                        <button class="btn btn-success me-3" onclick="window.location.href='{% url 'payment' %}'">Buy Now</button>
+                        <i class="wishlist-icon {% if cattle.id in user_wishlist %}fas{% else %}far{% endif %} fa-heart me-3" id="wishlist-icon" 
+                           onclick="toggleWishlist({{ cattle.id }})" 
+                           style="color: {% if cattle.id in user_wishlist %}#dc3545{% else %}black{% endif %};">
+                        </i>
+                    {% endif %}
                 </div>
+
+                {% if cattle.status == 3 and payment_details %}
+                    <p class="mt-3">This cattle was sold on {{ payment_details.payment_date|date:"F d, Y" }}</p>
+                {% endif %}
 
                 <div class="product-description">
                     <h3>Description</h3>
-                    <p>{{ cattle.subcategory.subcategory_description }}</p>
+                    <p>{{ cattle.description }}</p>
                 </div>
             </div>
         </div>
     </div>
+        <!-- Owner Details Modal -->
+        <div class="modal fade" id="ownerDetailsModal" tabindex="-1" aria-labelledby="ownerDetailsModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="ownerDetailsModalLabel">Owner Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="profile-item"><b>Name: </b>{{ owner.first_name }} {{ owner.last_name }}</div><br>
+                        <div class="profile-item"><b>Email:</b> {{ owner.email }}</div><br>
+                        <div class="profile-item"><b>Contact:</b> {{ owner.contact }}</div><br>
+                        <div class="profile-item"><b>Location:</b> {{ owner.city }}</div><br>
+                        <div class="profile-item"><b>Pincode: </b>{{ owner.postal_code }}</div><br>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     <footer class="site-footer">
         <div class="container">
@@ -243,11 +275,39 @@
         <i class="fas fa-arrow-up"></i>
     </a>
 
+    
     <!-- JAVASCRIPT FILES -->
     <script src="{% static 'js/jquery.min.js' %}"></script>
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'js/custom.js' %}"></script>
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function toggleWishlist(cattleId) {
+            $.ajax({
+                url: "{% url 'toggle_wishlist' %}",  // Use the correct URL without arguments
+                method: "POST",
+                data: {
+                    'cattle_id': cattleId,  // Pass cattle_id in the data
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'  // Include CSRF token
+                },
+                success: function(response) {
+                    const icon = $('#wishlist-icon');
+                    if (response.status === 'added') {
+                        icon.removeClass('far').addClass('fas'); // Solid heart
+                        icon.css('color', '#dc3545'); // Change color to red
+                    } else if (response.status === 'removed') {
+                        icon.removeClass('fas').addClass('far'); // Regular heart
+                        icon.css('color', ''); // Reset color
+                    }
+                },
+                error: function(xhr) {
+                    console.error(xhr.responseText);
+                }
+            });
+        }
+        
+    </script>
     <script>
         $(document).ready(function() {
             const scrollToTopBtn = $('#scroll-to-top');
@@ -262,7 +322,63 @@
                 e.preventDefault();
                 $('html, body').animate({scrollTop: 0}, '300');
             });
+
+            $('#wishlist-icon').click(function() {
+                $(this).toggleClass('fas far'); // Toggle between solid and regular heart
+                $(this).css('color', $(this).hasClass('fas') ? '#dc3545' : ''); // Change color to red if solid
+            });
         });
+    </script>
+    <script>
+        function redirectToDashboard(event) {
+            event.preventDefault(); // Prevent default anchor behavior
+            const cattleId = {{ cattle.id }}; // Get the cattle ID from the template
+            
+            // AJAX call to add item to cart
+            $.ajax({
+                url: "{% url 'add_to_cart' cattle.id %}",
+                method: "POST",
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if(response.status === 'success') {
+                        // If successfully added to cart, show success message
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Added to Cart',
+                            text: response.message,
+                            confirmButtonText: 'Go to Dashboard'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = "{% url 'user_dashboard' %}";
+                            }
+                        });
+                    } else if(response.status === 'error') {
+                        // Show error message if item is already in cart
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Already in Cart',
+                            text: response.message,
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error details:', {
+                        status: status,
+                        error: error,
+                        responseText: xhr.responseText
+                    });
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while adding the item to cart. Check console for details.',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            });
+        }
     </script>
 </body>
 </html>

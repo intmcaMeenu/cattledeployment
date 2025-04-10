@@ -14,18 +14,51 @@
             background-color: #f0f8ff;
             font-family: 'Roboto', sans-serif;
             color: #333;
-            padding-top: 20px;
+            padding-top: 60px; /* Ensure there's space for the fixed navbar */
             background-image: url('/static/images/cattle_background.jpg');
             background-size: cover;
             background-position: center;
-            background-attachment: fixed;
+        }
+
+        .navbar {
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, .1);
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000; /* Ensure the navbar stays on top of other content */
+        }
+
+        .navbar-brand {
+            font-family: 'Roboto', sans-serif;
+            font-weight: 600;
+            font-size: 24px;
+        }
+
+        .navbar-nav .nav-link {
+            color: #333;
+            font-weight: 500;
+            padding: 10px 15px;
+            transition: color 0.3s ease;
+            font-size: 18px; /* Increased size */
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: #5cadd3; /* Blue text on hover */
+        }
+
+        .navbar-nav .nav-link.active {
+            color: #5cadd3;
+            font-weight: 600;
         }
 
         .container {
             background-color: rgba(255, 255, 255, 0.9);
             border-radius: 15px;
             padding: 40px;
-            margin-top: 20px;
+            margin-top: 25px; /* Ensure there's space below the fixed navbar */
+            margin-bottom: 80px;
             box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
         }
 
@@ -85,16 +118,148 @@
             font-size: 0.9em;
             margin-top: 5px;
         }
+
+        /* Custom styles for the date input */
+        input[type="date"] {
+            appearance: none;
+            -webkit-appearance: none;
+            background-color: #fff;
+            border: 1px solid #ced4da;
+            border-radius: 0.25rem;
+            padding: 0.375rem 0.75rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #495057;
+            cursor: pointer;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            color: #495057;
+            cursor: pointer;
+            padding: 5px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23495057' class='bi bi-calendar' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-size: 16px;
+            background-position: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator:hover {
+            background-color: #e9ecef;
+        }
+
+        /* Styles for Firefox */
+        input[type="date"]::-moz-calendar-picker-indicator {
+            color: #495057;
+            cursor: pointer;
+        }
+
+        /* Custom calendar styles (these will only work in some browsers) */
+        ::-webkit-datetime-edit-fields-wrapper { padding: 0; }
+        ::-webkit-datetime-edit-text { color: #495057; padding: 0 0.3em; }
+        ::-webkit-datetime-edit-month-field { color: #495057; }
+        ::-webkit-datetime-edit-day-field { color: #495057; }
+        ::-webkit-datetime-edit-year-field { color: #495057; }
+        ::-webkit-inner-spin-button { display: none; }
+        ::-webkit-calendar-picker-indicator { background: transparent; }
+
+        .custom-file-input:lang(en)~.custom-file-label::after {
+            content: "Browse";
+        }
+
+        .custom-file-label {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-right: -15px;
+            margin-left: -15px;
+        }
+
+        .form-group {
+            flex: 0 0 50%;
+            max-width: 50%;
+            padding-right: 15px;
+            padding-left: 15px;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .form-group {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+        }
+
+        .btn-primary {
+            background-color: #5cadd3;
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            width: auto;
+            margin: 20px auto 0;
+            display: block;
+        }
+
+        .btn-primary:hover {
+            background-color: #4a8baa;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Improve responsiveness */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .form-row {
+                flex-direction: column;
+            }
+
+            .form-group {
+                margin-bottom: 15px;
+            }
+        }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <h2 class="text-center mb-5">Add Cattle</h2>
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <a class="navbar-brand" href="{% url 'indexcattle' %}">
+            <img src="{% static 'img/icon.png' %}" alt="Cow Icon" style="width: 30px; height: auto;">
+            CattleCare
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}" href="{% url 'indexcattle' %}" style="text-transform: uppercase; margin-right:80px;">HOME</a>
+                </li>
+                <!-- Add more navigation items as needed -->
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h2 class="mb-4">Add New Cattle</h2>
         <form method="POST" action="{% url 'user_cattle' %}" enctype="multipart/form-data" id="cattleForm">
             {% csrf_token %}
-            <div class="form-row">
-                <div class="form-group col-md-6">
+            <div class="row">
+                <div class="col-md-6 mb-3">
                     <label for="category">Category</label>
                     <select class="form-control" id="category" name="category" required>
                         <option value="">Select Category</option>
@@ -103,76 +268,102 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="form-group col-md-6">
+                <div class="col-md-6 mb-3">
                     <label for="subcategory">Breed</label>
-                    <select class="form-control" id="subcategory" name="subcategory" required>
+                    <select class="form-control" id="subcategory" name="subcategory">
                         <option value="">Select Breed</option>
                     </select>
                 </div>
             </div>
-            <div class="form-row">
-                <div class="form-group col-md-6">
+            <div class="row">
+                <div class="col-md-6 mb-3">
                     <label for="new_subcategory">New Breed (Optional)</label>
-                    <input type="text" class="form-control" id="new_subcategory" name="new_subcategory"
-                        placeholder="Enter new breed if not in the list above" pattern="^[a-zA-Z0-9 ]*$">
+                    <input type="text" class="form-control" id="new_subcategory" name="new_subcategory" placeholder="Enter new breed if not in the list above">
                     <div class="error-message" id="new_subcategory_error"></div>
                 </div>
-                <div class="form-group col-md-6">
+                <div class="col-md-6 mb-3">
                     <label for="dob">Date of Birth</label>
-                    <input type="date" class="form-control" id="dob" name="dob" required readonly>
+                    <input type="date" class="form-control" id="dob" name="dob" required>
                     <div class="error-message" id="dob_error"></div>
                 </div>
             </div>
-            <div class="form-row">
-                <div class="form-group col-md-6">
+            <div class="row">
+                <div class="col-md-6 mb-3">
                     <label for="weight">Weight (kg)</label>
-                    <input type="number" step="0.01" class="form-control" id="weight" name="weight" required
-                        placeholder="Enter weight in kg" min="5" max="1000">
+                    <input type="number" step="0.01" class="form-control" id="weight" name="weight" required placeholder="Enter weight in kg">
                     <div class="error-message" id="weight_error"></div>
                 </div>
-                <div class="form-group col-md-6">
+                <div class="col-md-6 mb-3">
                     <label for="color">Color</label>
-                    <input type="text" class="form-control" id="color" name="color" required
-                        placeholder="Enter color of the cattle" pattern="^[a-zA-Z ]*$">
+                    <input type="text" class="form-control" id="color" name="color" required placeholder="Enter color of the cattle">
                     <div class="error-message" id="color_error"></div>
                 </div>
             </div>
-            <div class="form-row">
-                <div class="form-group col-md-6">
-                    <label for="image">Image</label>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="image">Image Upload</label>
                     <div class="custom-file">
-                        <input type="file" class="custom-file-input" id="image" name="image" required accept=".jpg,.jpeg,.png">
+                        <input type="file" class="custom-file-input" id="image" name="image" required accept="image/*" onchange="fileValidation()">
                         <label class="custom-file-label" for="image">Choose file</label>
                     </div>
                     <div class="error-message" id="image_error"></div>
                 </div>
-                <div class="form-group col-md-6">
-                    <label for="number_of_cattle">Number of Cattle</label>
-                    <input type="number" class="form-control" id="number_of_cattle" name="number_of_cattle" required
-                        placeholder="Enter number of cattle" min="1">
-                    <div class="error-message" id="number_of_cattle_error"></div>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group col-md-6">
+                <div class="col-md-6 mb-3">
                     <label for="milk_production">Daily Milk Production (liters) (Optional)</label>
-                    <input type="number" step="0.01" class="form-control" id="milk_production" name="milk_production"
-                        placeholder="Enter daily milk production in liters" min="0">
+                    <input type="number" step="0.01" class="form-control" id="milk_production" name="milk_production" placeholder="Enter daily milk production in liters">
                     <div class="error-message" id="milk_production_error"></div>
                 </div>
-                <div class="form-group col-md-6">
-                    <label for="price">Price</label>
-                    <input type="number" step="0.01" class="form-control" id="price" name="price" required
-                        placeholder="Enter your desired price" min="0">
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="price">Price (INR)</label>
+                    <input type="number" step="0.01" class="form-control" id="price" name="price" required placeholder="Enter price in INR">
                     <div class="error-message" id="price_error"></div>
                 </div>
+                <div class="col-md-6 mb-3">
+                    <label for="description">Description</label>
+                    <textarea class="form-control" id="description" name="description" placeholder="Enter details about the cattle" rows="4" required></textarea>
+                    <div class="error-message" id="description_error"></div>
+                </div>
             </div>
-            <button type="submit" class="btn btn-primary mt-4">Submit</button>
+            <button type="submit" class="btn btn-primary mt-3">Submit</button>
         </form>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
+        const validImageNames = [
+            "Belgische_blauwe", "Belted_Galloway", "Black_Baldy", "Black_Simmental", "black-white-hf-cow-", "boer goat", "Brown_Swiss","Cattle", "Galloway", 
+            "gir brown", "Hallikaru", "Hallikaru_01", "Hereford", "Hereford_1", "Holstein_Friesian", "Holstein_heifer", "Hungarian_Gray", "jamunapari", "jersey brown", "kota goat", 
+            "Lanouaille_race_limousine", "Limousine", "Lowline_Australian", "Montbeliarde", "Polled_Hereford", "red_sindhi_cow","vechur","Simmentaler_Fleckvieh", "sojat-goat", "Cattle", "cow1"
+        ];
+
+        function fileValidation() {
+            const fileInput = document.getElementById('image');
+            const errorMessage = document.getElementById('image_error');
+            const file = fileInput.files[0];
+
+            if (file) {
+                const fileType = file.type;
+                const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+                const fileName = file.name.split('.')[0]; // Get the file name without extension
+
+                if (validTypes.includes(fileType) && validImageNames.includes(fileName)) {
+                    errorMessage.textContent = 'Valid image.';
+                    errorMessage.style.color = 'green';
+                } else {
+                    errorMessage.textContent = 'Invalid image. Please select a valid cattle image.';
+                    errorMessage.style.color = 'red';
+                    fileInput.value = ''; // Clear the input
+                }
+            } else {
+                errorMessage.textContent = 'No image file selected.';
+                errorMessage.style.color = 'red';
+            }
+        }
+
         $(document).ready(function () {
             $('#category').change(function () {
                 var categoryId = $(this).val();
@@ -208,14 +399,49 @@
                 }
             });
 
-            // Date of Birth validation
-            var today = new Date();
-            var oneMonthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
-            var formattedOneMonthAgo = oneMonthAgo.toISOString().split('T')[0];
-            var formattedToday = today.toISOString().split('T')[0];
-            
-            $('#dob').attr('max', formattedToday);
-            $('#dob').attr('min', formattedOneMonthAgo);
+            // DOB validation and setup
+            function setupDOBInput() {
+                var today = new Date();
+                var oneMonthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+                
+                // Format the dates to 'YYYY-MM-DD'
+                var formattedOneMonthAgo = oneMonthAgo.toISOString().split('T')[0];
+                var formattedToday = today.toISOString().split('T')[0];
+
+                // Set the max and min attributes for the DOB input
+                $('#dob').attr('max', formattedOneMonthAgo);
+                $('#dob').attr('min', '1900-01-01'); // Set a reasonable minimum date
+
+                // Disable manual input
+                $('#dob').on('keydown', function(e) {
+                    e.preventDefault();
+                });
+
+                // Validate selected date
+                $('#dob').on('change', function() {
+                    var selectedDate = new Date($(this).val());
+                    if (selectedDate > oneMonthAgo) {
+                        $('#dob_error').text('Please select a date at least one month ago.');
+                        $(this).val(''); // Clear the invalid date
+                    } else {
+                        $('#dob_error').text('');
+                    }
+                });
+
+                // Open calendar on input focus
+                $('#dob').on('focus', function() {
+                    $(this).attr('type', 'date');
+                });
+
+                // Change input type to text when not focused (for better placeholder support)
+                $('#dob').on('blur', function() {
+                    if (!$(this).val()) {
+                        $(this).attr('type', 'text');
+                    }
+                });
+            }
+
+            setupDOBInput();
 
             // Weight validation
             $('#weight').on('input', function() {
@@ -238,35 +464,15 @@
                 }
             });
 
-            // Image validation
-            $('#image').change(function() {
-                var file = this.files[0];
-                var fileType = file.type;
-                var match = ['image/jpeg', 'image/png', 'image/jpg'];
-                if (!((fileType == match[0]) || (fileType == match[1]) || (fileType == match[2]))) {
-                    $('#image_error').text('Please select a valid image file (JPEG/JPG/PNG).');
-                    $(this).val('');
-                    return false;
-                } else {
-                    $('#image_error').text('');
-                }
-            });
-
-            // Number of cattle validation
-            $('#number_of_cattle').on('input', function() {
-                var value = $(this).val();
-                if (value <= 0 || !Number.isInteger(Number(value))) {
-                    $('#number_of_cattle_error').text('Please enter a positive whole number.');
-                } else {
-                    $('#number_of_cattle_error').text('');
-                }
-            });
-
             // Milk production validation
             $('#milk_production').on('input', function() {
-                var value = $(this).val();
-                if (value < 0) {
+                var value = parseFloat($(this).val());
+                if (isNaN(value)) {
+                    $('#milk_production_error').text('Please enter a valid number.');
+                } else if (value < 0) {
                     $('#milk_production_error').text('Please enter a non-negative number.');
+                } else if (value > 70) {
+                    $('#milk_production_error').text('Maximum milk production is 70 liters.');
                 } else {
                     $('#milk_production_error').text('');
                 }
@@ -274,31 +480,96 @@
 
             // Price validation
             $('#price').on('input', function() {
-                var value = $(this).val();
-                if (value < 0) {
+                var value = parseFloat($(this).val());
+                if (isNaN(value)) {
+                    $('#price_error').text('Please enter a valid number.');
+                } else if (value < 0) {
                     $('#price_error').text('Please enter a non-negative number.');
+                } else if (value > 100000) {
+                    $('#price_error').text('Maximum price is 100,000 INR.');
                 } else {
                     $('#price_error').text('');
                 }
             });
 
+            // Description validation
+            $('#description').on('input', function() {
+                var input = $(this).val();
+                var regex = /^[a-zA-Z0-9 ,.-]*$/;
+                if (!regex.test(input)) {
+                    $('#description_error').text('Only characters, numbers, spaces are allowed.');
+                } else {
+                    $('#description_error').text('');
+                }
+            });
+
             // Form submission
-            $('#cattleForm').submit(function() {
-                var hasError = false;
-                $('.error-message').each(function() {
-                    if ($(this).text() !== '') {
-                        hasError = true;
-                        return false;
+            $('#cattleForm').submit(function(e) {
+                e.preventDefault();
+                
+                // Client-side price validation
+                var price = parseFloat($('#price').val());
+                if (isNaN(price) || price < 1000 || price > 100000) {
+                    alert('Price must be between 1,000 and 100,000.');
+                    return;
+                }
+
+                var formData = new FormData(this);
+                $.ajax({
+                    url: $(this).attr('action'),
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        console.log('Success response:', response);
+                        if (response.success) {
+                            alert(response.message);
+                            window.location.href = '{% url "user_dashboard" %}';
+                        } else {
+                            alert('Error: ' + response.error);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.log('Error response:', xhr.responseText);
+                        console.log('Status:', status);
+                        console.log('Error:', error);
+                        try {
+                            var errorResponse = JSON.parse(xhr.responseText);
+                            alert('Error: ' + errorResponse.error);
+                        } catch (e) {
+                            alert('An unexpected error occurred. Please try again.');
+                        }
                     }
                 });
+            });
 
-                if (hasError) {
-                    e.preventDefault();
-                    alert('Please correct the errors before submitting.');
+            // Add real-time validation for the price input
+            $('#price').on('input', function() {
+                var price = parseFloat($(this).val());
+                var errorElement = $('#price_error');
+                if (isNaN(price) || price < 1000 || price > 100000) {
+                    errorElement.text('Price must be between 1,000 and 100,000.');
+                    $(this).addClass('is-invalid');
+                } else {
+                    errorElement.text('');
+                    $(this).removeClass('is-invalid');
+                }
+            });
+
+            // Toggle required attribute based on user input
+            $('#subcategory, #new_subcategory').on('change input', function() {
+                var subcategorySelected = $('#subcategory').val() !== "";
+                var newSubcategoryFilled = $('#new_subcategory').val().trim() !== "";
+
+                if (subcategorySelected || newSubcategoryFilled) {
+                    $('#subcategory, #new_subcategory').removeAttr('required');
+                } else {
+                    $('#subcategory, #new_subcategory').attr('required', 'required');
                 }
             });
         });
     </script>
 </body>
 
-</html>
+</html> 

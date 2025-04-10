@@ -182,21 +182,27 @@
         <h1 class="text-center mb-5">{{ category.category_name }}</h1>
         <div class="row">
             {% for cattle in cattle %}
-                <div class="col-md-4 mb-4">
-                    <div class="cattle-card">
-                        <img src="{{ cattle.image.url }}" alt="{{ cattle.subcategory.subcategory_name }}" class="cattle-image">
-                        <h3 class="cattle-title">{{ cattle.subcategory.subcategory_name }}</h3>
-                        <div class="cattle-details">
-                            <p><strong>Price:</strong> ₹{{ cattle.price }}</p>
-                            <p><strong>Age:</strong> {{ cattle.dob|timesince }}</p>
-                            <p><strong>Weight:</strong> {{ cattle.weight }} kg</p>
-                            <p><strong>Color:</strong> {{ cattle.color }}</p>
-                            <p><strong>Milk Production:</strong> {{ cattle.milk_production }} liters/day</p>
-                            <p><strong>Number of Cattle:</strong> {{ cattle.number_of_cattle }}</p>
+                {% if cattle.status == 1 or cattle.status == 3 %}
+                    <div class="col-md-4 mb-4">
+                        <div class="cattle-card">
+                            <img src="{{ cattle.image.url }}" alt="{{ cattle.subcategory.subcategory_name }}" class="cattle-image">
+                            <h3 class="cattle-title">{{ cattle.subcategory.subcategory_name }}</h3>
+                            <div class="cattle-details">
+                                <p><strong>Price:</strong> ₹{{ cattle.price }}</p>
+                                <p><strong>Age:</strong> {{ cattle.dob|timesince }}</p>
+                                <p><strong>Weight:</strong> {{ cattle.weight }} kg</p>
+                                <p><strong>Color:</strong> {{ cattle.color }}</p>
+                                <p><strong>Milk Production:</strong> {{ cattle.milk_production }} liters/day</p>
+                            </div>
+                            {% if cattle.status == 1 %}
+                                <p style="color: green;">Available</p>
+                            {% elif cattle.status == 3 %}
+                                <p style="color: red;">Sold Out</p>
+                            {% endif %}
+                            <a href="{% url 'user_productview' cattle.id %}" class="btn btn-view-more mt-3">View More</a>
                         </div>
-                        <a href="{% url 'user_productview' cattle.id %}" class="btn btn-view-more mt-3">View More</a>
                     </div>
-                </div>
+                {% endif %}
             {% empty %}
                 <div class="col-12">
                     <p class="text-center">No cattle available for this category.</p>
@@ -240,10 +246,7 @@
                     scrollToTopBtn.removeClass('show');
                 }
             });
-            scrollToTopBtn.click(function(e) {
-                e.preventDefault();
-                $('html, body').animate({scrollTop: 0}, '300');
-            });
+            
         });
     </script>
 </body>

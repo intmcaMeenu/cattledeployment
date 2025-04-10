@@ -1,0 +1,42 @@
+<html>
+<h2 align="center"><a style="text-decoration:none;" href="{% url 'indexcattle' %}">Go back to Home page</a></h2>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+    var options = {
+        "key": "rzp_test_c6h8k05FLcSJrQ", // Enter the Key ID generated from the Dashboard
+        "amount": "{{ amount }}", // This should now be in paise (e.g., 75000 for ₹750)
+        "currency": "INR",
+        "description": "Cattle Care",
+        "image": "",
+        "handler": function (response) {
+            console.log(response);
+            alert("Payment successful");
+
+            // Send transaction details to Django backend
+            $.ajax({
+                type: "POST",
+                url: "/save_payment/", // Update with your Django endpoint
+                data: {
+                    'payment_id': response.razorpay_payment_id,
+                    'amount': "{{ amount }}", // This is already in paise
+                    'csrfmiddlewaretoken': '{{ csrf_token }}' // Include CSRF token for security
+                },
+                success: function (data) {
+                    console.log("Transaction details saved:", data);
+                    window.location.href = "{% url 'user_dashboard' %}";
+                },
+                error: function (error) {
+                    console.error("Error saving transaction details:", error);
+                }
+            });
+        }
+    }
+    var rzp1 = new Razorpay(options);
+    $(document).ready(function (e) {
+        rzp1.open();
+        e.preventDefault();
+    })
+</script>
+
+</html>

@@ -12,9 +12,12 @@
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h3 class="card-title">Subcategories</h3>
                             <div class="card-tools">
-                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addSubcategoryModal">
-                                    Add Subcategory
-                                </button>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <input type="text" id="subcategorySearch" class="form-control form-control-sm rounded-pill" placeholder="Search subcategories..." style="width: 200px; border-radius: 50px;">
+                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addSubcategoryModal" style="margin-left: 15px;" >
+                                        Add Subcategory
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <div class="card-body">
@@ -25,25 +28,28 @@
                                             <th>Sl. No.</th>
                                             <th>Category Name</th>
                                             <th>Subcategory Name</th>
-                                            <th>Subcategory Description</th>
+                                            
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {% for subcategory in subcategories %}
-                                        <tr>
+                                        <tr class="subcategory-row">
                                             <td>{{ forloop.counter }}</td>
                                             <td>{{ subcategory.category.category_name }}</td>
                                             <td>{{ subcategory.subcategory_name }}</td>
-                                            <td>{{ subcategory.subcategory_description }}</td>
+                                            
                                             <td>
                                                 <button class="btn btn-sm btn-primary edit-btn" data-toggle="modal" data-target="#editSubcategoryModal{{ subcategory.subcategory_id }}">Edit</button>
-                                                <button class="btn btn-sm btn-danger delete-btn" data-id="{{ subcategory.subcategory_id }}">Delete</button>
+                                                
                                             </td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
                                 </table>
+                                <div id="noSubcategoryFound" style="display: none; text-align: center; padding: 20px;">
+                                    No data found.
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -81,11 +87,7 @@
                         <input type="text" class="form-control" id="subcategory_name" name="subcategory_name" required>
                         <small id="subcategoryNameError" class="form-text text-danger" style="display: none;"></small>
                     </div>
-                    <div class="form-group">
-                        <label for="subcategory_description">Description</label>
-                        <textarea class="form-control" id="subcategory_description" name="subcategory_description" rows="3"></textarea>
-                        <small id="subcategoryDescriptionError" class="form-text text-danger" style="display: none;"></small>
-                    </div>
+                   
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -125,11 +127,7 @@
                         <input type="text" class="form-control subcategory_name" id="edit_subcategory_name_{{ subcategory.subcategory_id }}" name="subcategory_name" value="{{ subcategory.subcategory_name }}" required>
                         <small class="form-text text-danger subcategoryNameError" style="display: none;"></small>
                     </div>
-                    <div class="form-group">
-                        <label for="subcategory_description">Description</label>
-                        <textarea class="form-control subcategory_description" id="edit_subcategory_description_{{ subcategory.subcategory_id }}" name="subcategory_description" rows="3">{{ subcategory.subcategory_description }}</textarea>
-                        <small class="form-text text-danger subcategoryDescriptionError" style="display: none;"></small>
-                    </div>
+                    
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -168,11 +166,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const addForm = document.getElementById('addSubcategoryForm');
     const categoryInput = document.getElementById('category');
     const subcategoryNameInput = document.getElementById('subcategory_name');
-    const subcategoryDescriptionInput = document.getElementById('subcategory_description');
+    
     const categoryError = document.getElementById('categoryError');
     const subcategoryNameError = document.getElementById('subcategoryNameError');
-    const subcategoryDescriptionError = document.getElementById('subcategoryDescriptionError');
+    
     const addSubcategoryBtn = document.getElementById('addSubcategoryBtn');
+    const subcategorySearchInput = document.getElementById('subcategorySearch');
     
     function validateSubcategory(value, categoryId) {
         const regex = /^[A-Za-z0-9\s]+$/;
@@ -183,15 +182,9 @@ document.addEventListener('DOMContentLoaded', function() {
         return '';
     }
 
-    function validateDescription(value) {
-        const regex = /^[a-zA-Z0-9\s.,'-]+$/;
-        if (!regex.test(value)) {
-            return 'Only alphanumeric characters, spaces, and punctuation are allowed';
-        }
-        return '';
-    }
+   
 
-    function setupValidation(form, categoryInput, subcategoryNameInput, subcategoryDescriptionInput, categoryError, subcategoryNameError, subcategoryDescriptionError) {
+    function setupValidation(form, categoryInput, subcategoryNameInput,  categoryError, subcategoryNameError) {
         subcategoryNameInput.addEventListener('input', function() {
             const error = validateSubcategory(this.value, categoryInput.value);
             if (error) {
@@ -206,25 +199,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        subcategoryDescriptionInput.addEventListener('input', function() {
-            const error = validateDescription(this.value);
-            if (error) {
-                this.style.borderColor = 'red';
-                subcategoryDescriptionError.textContent = error;
-                subcategoryDescriptionError.style.display = 'block';
-                addSubcategoryBtn.disabled = true;
-            } else {
-                this.style.borderColor = 'green';
-                subcategoryDescriptionError.style.display = 'none';
-                addSubcategoryBtn.disabled = false;
-            }
-        });
+       
 
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             const categoryValue = categoryInput.value.trim();
             const subcategoryNameValue = subcategoryNameInput.value.trim();
-            const subcategoryDescriptionValue = subcategoryDescriptionInput.value.trim();
+            
 
             let isValid = true;
 
@@ -245,14 +226,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 subcategoryNameError.style.display = 'none';
             }
 
-            const descriptionErrorMsg = validateDescription(subcategoryDescriptionValue);
-            if (descriptionErrorMsg) {
-                subcategoryDescriptionError.textContent = descriptionErrorMsg;
-                subcategoryDescriptionError.style.display = 'block';
-                isValid = false;
-            } else {
-                subcategoryDescriptionError.style.display = 'none';
-            }
+            
 
             if (isValid) {
                 this.submit();
@@ -260,18 +234,18 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    setupValidation(addForm, categoryInput, subcategoryNameInput, subcategoryDescriptionInput, categoryError, subcategoryNameError, subcategoryDescriptionError);
+    setupValidation(addForm, categoryInput, subcategoryNameInput, categoryError, subcategoryNameError);
 
     document.querySelectorAll('.editSubcategoryForm').forEach(form => {
         const subcategoryId = form.querySelector('input[name="subcategory_id"]').value;
         const editCategoryInput = form.querySelector(`#edit_category_${subcategoryId}`);
         const editSubcategoryNameInput = form.querySelector(`#edit_subcategory_name_${subcategoryId}`);
-        const editSubcategoryDescriptionInput = form.querySelector(`#edit_subcategory_description_${subcategoryId}`);
+        
         const editCategoryError = form.querySelector('.categoryError');
         const editSubcategoryNameError = form.querySelector('.subcategoryNameError');
-        const editSubcategoryDescriptionError = form.querySelector('.subcategoryDescriptionError');
+       
 
-        setupValidation(form, editCategoryInput, editSubcategoryNameInput, editSubcategoryDescriptionInput, editCategoryError, editSubcategoryNameError, editSubcategoryDescriptionError);
+        setupValidation(form, editCategoryInput, editSubcategoryNameInput, editCategoryError, editSubcategoryNameError);
     });
 
     const deleteButtons = document.querySelectorAll('.delete-btn');
@@ -282,6 +256,37 @@ document.addEventListener('DOMContentLoaded', function() {
             $('#deleteSubcategoryModal').modal('show');
         });
     });
+   
+});
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('subcategorySearch');
+    const tableRows = document.querySelectorAll('.subcategory-row');
+    const noDataFound = document.getElementById('noSubcategoryFound');
+
+    let filteredRows = [...tableRows];
+
+    function showRows() {
+        tableRows.forEach(row => row.style.display = 'none');
+        filteredRows.forEach(row => row.style.display = '');
+
+        if (filteredRows.length === 0) {
+            noDataFound.style.display = 'block';
+        } else {
+            noDataFound.style.display = 'none';
+        }
+    }
+
+    function filterRows() {
+        const searchTerm = searchInput.value.toLowerCase();
+        filteredRows = [...tableRows].filter(row => 
+            row.textContent.toLowerCase().includes(searchTerm)
+        );
+        showRows();
+    }
+
+    searchInput.addEventListener('input', filterRows);
+
+    showRows();
 });
 </script>
 

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order confirmation</title>
+    <meta name="robots" content="noindex,nofollow" />
+    <style>
+        @import url(https://fonts.googleapis.com/css?family=Open+Sans:400,700);
+        body { margin: 0; padding: 0; background: #e1e1e1; font-family: 'Open Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+        .invoice-container { max-height:500px;max-width: 600px; margin: 30px auto; background: #ffffff; border-radius: 10px; padding: 40px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; }
+        td, th { padding: 10px; }
+        .header { border-bottom: 1px solid #e4e4e4; }
+        .logo { font-size: 24px; color: #ff0000; font-weight: bold; }
+        .details { font-size: 14px; color: #5b5b5b; }
+        .item-table { margin-top: 30px; }
+        .item-table th { background: #f8f8f8; text-align: left; }
+        .item-table td, .item-table th { border-bottom: 1px solid #e4e4e4; }
+        .total { font-weight: bold; }
+        .footer { margin-top: 30px; text-align: center; font-size: 14px; color: #5b5b5b; }
+        #downloadPDF { display: block; margin: 20px auto; padding: 10px 20px; background: #ff0000; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+    <div id="invoice-container" class="invoice-container">
+        <table class="header">
+            <tr>
+                <td>
+                    <div class="logo">Cattlecare</div>
+                </td>
+                <td style="text-align: right;">
+                    <div class="details">
+                        Invoice Date: {{ payment.payment_date|date:'F j, Y' }}
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <table style="margin-top: 30px;">
+            <tr>
+                <td class="details">
+                    <strong>Bill To:</strong><br>
+                    {{ user.first_name }} {{ user.last_name }}<br>
+                    {{ user.house_name }}<br>
+                    {{ user.contact }}<br>
+                    {{ user.city }}<br>
+                    {{ user.postal_code }}
+                </td>
+                <td class="details" style="text-align: right;">
+                    <strong>Seller Details:</strong><br>
+                    {{payment.cattle.user.first_name}} {{payment.cattle.user.last_name}}<br>
+                    {{payment.cattle.user.contact}}<br>
+                    {{payment.cattle.user.email}}<br>
+                    {{payment.cattle.user.city}}
+                </td>
+            </tr>
+        </table>
+
+        <table class="item-table">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th style="text-align: right;">Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ payment.cattle.subcategory.subcategory_name }}</td>
+                    <td style="text-align: right;">{{ payment.amount }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table style="margin-top: 30px;">
+            <tr>
+                <td class="total">Total</td>
+                <td style="text-align: right;" class="total">{{ payment.amount }}</td>
+            </tr>
+           
+            <tr>
+                <td colspan="2" style="text-align: right; ">
+                    {{ amount_in_words }} Rupees Only
+                </td>
+            </tr>
+        </table>
+
+        <div class="footer">
+            Thank you for shopping from Cattlecare and for your order.
+        </div>
+    </div>
+
+    <button id="downloadPDF">Download Invoice as PDF</button>
+
+    <script>
+        document.getElementById('downloadPDF').addEventListener('click', function() {
+            const element = document.getElementById('invoice-container');
+            const opt = { // Top, right, bottom, left margins in millimeters
+                filename: 'invoice.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a5', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save();
+        });
+    </script>
+</body>
+</html>

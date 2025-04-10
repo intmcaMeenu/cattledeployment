@@ -20,20 +20,21 @@ from cattle_app.views import index
 from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.static import serve
+from django.urls import re_path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('cattle_app.urls')),
     path('', index, name='index'),
-    path('user/', include('cattle_app.urls')),
-    path('accounts/', include('allauth.urls')),
-
-    path('admin/', admin.site.urls),
-    path('', include('cattle_app.urls')),
-    path('', index, name='index'),
-    path('user/', include('cattle_app.urls')),
     path('accounts/', include('allauth.urls')),
 ]
 
+# Serve media files in both development and production
+urlpatterns += [
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+]
+
+# Only serve static files in development
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

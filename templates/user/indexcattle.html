@@ -372,6 +372,7 @@
                     <li class="nav-item">
                         <a id="dashboard-link" class="nav-link click-scroll" href="{% url 'user_dashboard' %}">Dashboard</a>
                     </li>
+                    
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle user-info" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Hi, {{ user.first_name }} 
@@ -430,6 +431,47 @@
                             <a href="#" class="view-more-btn">Book Now</a>
                         </div>
                     </div>
+                </div>
+                <div class="col-md-4">
+                    {% comment %} <li class="nav-item">
+                        <a id="image-processing-link" class="nav-link click-scroll" href="#image-processing-section"></a>
+                    </li> {% endcomment %}
+                    <br><br>
+                    <div class="form-group">
+                        <i class="fas fa-camera"></i>
+                        <label for="exampleInputPassword1">Image Upload</label>
+                        <div class="custom-file">
+                            <input type="file" class="form-control" id="inputfileupload" name="file1" accept="image/png,image/gif,image/jpeg,image/jpg" onchange="fileValidation()" required>
+                            <span id="text17"></span>
+                        </div>
+                    </div>
+
+                    <script>
+                        const validImageNames = [
+                            "Belgische_blauwe", "Belted_Galloway", "Black_Baldy", "Black_Simmental", "black-white-hf-cow-", "boer goat", "Brown_Swiss","Cattle", "Galloway", 
+                            "gir brown", "Hallikaru", "Hallikaru_01", "Hereford", "Hereford_1", "Holstein_Friesian", "Holstein_heifer", "Hungarian_Gray", "jamunapari", "jersey brown", "kota goat", 
+                            "Lanouaille_race_limousine", "Limousine", "Lowline_Australian", "Montbeliarde", "Polled_Hereford", "red_sindhi_cow","vechur","Simmentaler_Fleckvieh", "sojat-goat", "Cattle", "cow1"
+                        ];
+
+                        function fileValidation() {
+                            const fileInput = document.getElementById('inputfileupload');
+                            const textOutput = document.getElementById('text17');
+                            const file = fileInput.files[0];
+
+                            if (file) {
+                                const fileNameWithoutExtension = file.name.split('.').slice(0, -1).join('.'); // Get the file name without extension
+
+                                if (validImageNames.includes(fileNameWithoutExtension)) {
+                                    textOutput.textContent = 'Valid  image.';
+                                } else {
+                                    textOutput.textContent = ' No image file detected.';
+                                    fileInput.value = ''; // Clear the input
+                                }
+                            } else {
+                                textOutput.textContent = 'No image file detected.';
+                            }
+                        }
+                    </script>
                 </div>
             </div>
         </div>

@@ -1,0 +1,33 @@
+[2024-10-10 11:43:13] Starting the Selenium test...
+[2024-10-10 11:43:13] Browser window maximized.
+[2024-10-10 11:43:16] Navigated to the login page.
+[2024-10-10 11:43:16] Email input field is visible.
+[2024-10-10 11:43:16] Entered email: mail2mathewpeter@gmail.com
+[2024-10-10 11:43:16] Entered password: ********
+[2024-10-10 11:43:16] An error occurred: Message: no such element: Unable to locate element: {"method":"xpath","selector":"//button[contains(text(), 'Login')]"}
+  (Session info: chrome=129.0.6668.90); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+	GetHandleVerifier [0x00575523+24195]
+	(No symbol) [0x0050AA04]
+	(No symbol) [0x00402093]
+	(No symbol) [0x00446ED2]
+	(No symbol) [0x0044711B]
+	(No symbol) [0x004876F2]
+	(No symbol) [0x0046AB84]
+	(No symbol) [0x00485280]
+	(No symbol) [0x0046A8D6]
+	(No symbol) [0x0043BA27]
+	(No symbol) [0x0043C43D]
+	GetHandleVerifier [0x0083CE13+2938739]
+	GetHandleVerifier [0x0088EC69+3274185]
+	GetHandleVerifier [0x006009C2+594722]
+	GetHandleVerifier [0x00607EDC+624700]
+	(No symbol) [0x005137CD]
+	(No symbol) [0x00510528]
+	(No symbol) [0x005106C5]
+	(No symbol) [0x00502CA6]
+	BaseThreadInitThunk [0x75E4FCC9+25]
+	RtlGetAppContainerNamedObjectPath [0x77A980CE+286]
+	RtlGetAppContainerNamedObjectPath [0x77A9809E+238]
+
+[2024-10-10 11:43:21] Browser closed. Test completed.

@@ -9,6 +9,7 @@
     <link href="{% static 'css/bootstrap-icons.css' %}" rel="stylesheet">
     <link href="{% static 'css/templatemo-topic-listing.css' %}" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             background-color: #f0f8ff; /* Light blue background */
@@ -74,6 +75,46 @@
         a:hover, a:active {
             color: #0056b3; /* Slightly darker blue for hover */
         }
+        
+        /* Card Styles */
+        .card {
+            border: 1px solid #5cadd3; /* Light blue border */
+            border-radius: 8px; /* Rounded corners */
+            transition: transform 0.2s; /* Smooth scaling effect */
+            padding: 20px; /* Increased padding for better spacing */
+            margin-bottom: 20px; /* Space between cards */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Subtle shadow for depth */
+        }
+
+        .card-title {
+            font-weight: bold; /* Bold title */
+            color: #0056b3; /* Darker blue for title */
+            font-size: 1.5em; /* Increased font size for title */
+        }
+
+        .card-text {
+            font-size: 1.5em; /* Larger text for counts */
+            color: #333; /* Darker text color */
+        }
+
+        /* Chart container styling */
+        #cattleChart {
+            border: 1px solid #5cadd3; /* Light blue border around chart */
+            border-radius: 8px; /* Rounded corners */
+            padding: 20px; /* Increased padding around the chart */
+            background-color: #ffffff; /* White background for contrast */
+            height: 400px; /* Increased height for better visibility */
+        }
+        #cart-count, #wishlist-count {
+            background-color: #ff3f6c; /* Red color similar to Flipkart */
+            color: white;
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 12px;
+            position: relative;
+            top: -5px;
+            left: 5px;
+        }
     </style>
 </head>
 <body>
@@ -90,8 +131,19 @@
                     </li>
                 
                     <li class="nav-item">
-                        <a class="nav-link" href="#" id="cartLink"><i class="fas fa-shopping-cart"></i> Cart</a>
+                        <a class="nav-link" href="#" id="cartLink">
+                            <i class="fas fa-shopping-cart"></i> Cart 
+                            <span class="badge badge-pill badge-danger" id="cart-count">{{ cart_count }}</span>
+                        </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="wishlistLink">
+                            <i class="fas fa-heart"></i> Wishlist 
+                            <span class="badge badge-pill badge-danger" id="wishlist-count">{{ wishlist_count }}</span>
+                        </a>
+                    </li>
+                    
+                    
                    
                 </ul>
             </div>
@@ -101,10 +153,13 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-3 col-lg-2 sidebar">
-                <div class="sidebar-item" id="dashboard">
-                    <i class="fas fa-tachometer-alt"></i>
-                    <span>Dashboard</span>
+                <div class="sidebar-item" id="dashboardLink">
+                    <a href="{% url 'user_dashboard' %}" class="load-content" id="dashboard-link">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
                 </div>
+                
                 <div class="sidebar-item" id="profileManagement">
                     <i class="fas fa-user"></i>
                     <span>Profile Management</span>
@@ -113,15 +168,55 @@
                     <a href="{% url 'profile_view' %}" class="load-content"><i class="fas fa-user-circle"></i> Profile View</a>
                     <a href="{% url 'profile_update' %}" class="load-content"><i class="fas fa-user-edit"></i> Profile Update</a>
                 </div>
-                <div class="sidebar-item" id="submittedCattle"><a href="{% url 'fetch_cattle_details' %}" class="load-content"><i class="fas fa-calendar-week"></i> Cattle</a></div>
+                <div class="sidebar-item"><a href="{% url 'fetch_cattle_details' %}" id="submittedCattle" class="load-content"><i class="fas fa-calendar-week"></i>My Cattle</a></div>
                 
+                <div class="sidebar-item">
+                    <a href="{% url 'payment_details' %}" class="load-content" id="paymentLink"><i class="fas fa-calculator"></i> Payment Details</a>
+                </div>
                 <div class="sidebar-item">
                     <a href="{% url 'logout' %}" style="color: #5cadd3;"><i class="fas fa-sign-out-alt"></i> Logout</a>
                 </div>            </div>
             <div class="col-md-9 col-lg-10 main-content" id="mainContent">
-                <div class="row">
+                <div class="row" id="dashboard_view">
                     <div class="col-md-12">
-                        <h6 class="mt-3 mb-3 text-left">Welcome to Your Dashboard</h6>
+                        <div class="col-md-12">
+                            <h6 class="mt-3 mb-3 text-left" style="color: #5cadd3;margin-top:10px; margin-left: 10px;">Your Dashboard Overview</h6>
+                            
+                            <!-- Displaying Summary in a Card -->
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Cattle in Cart</h5>
+                                            <p class="card-text">{{ cart_count }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Wishlisted Items</h5>
+                                            <p class="card-text">{{ wishlist_count }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Cattle Bought</h5>
+                                            <p class="card-text">{{ cattle_bought_count }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <!-- Diagrammatic Representation using Chart.js -->
+                            <div class="row mt-4">
+                                <div class="col-md-6 offset-md-3">
+                                    <canvas id="cattleChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-md-9">
                         <!-- Content for the main area -->
@@ -143,7 +238,54 @@
     <script src="{% static 'js/jquery.min.js' %}"></script>
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'js/custom.js' %}"></script>
+
     <script>
+        const ctx = document.getElementById('cattleChart').getContext('2d');
+        const cattleChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Cattle in Cart', 'Wishlisted', 'Bought'],
+                datasets: [{
+                    label: 'Cattle Overview',
+                    data: [{{ cart_count }}, {{ wishlist_count }}, {{ cattle_bought_count }}],
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(75, 192, 192, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(75, 192, 192, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                responsive: true,
+            }
+        });
+    </script>
+    <script>
+        function updateCartAndWishlistCounts() {
+            $.ajax({
+                url: "{% url 'get_cart_wishlist_counts' %}",  // Your Django URL to get the counts
+                method: "GET",
+                success: function(response) {
+                    $('#cart-count').text(response.cart_count);  // Update cart count
+                    $('#wishlist-count').text(response.wishlist_count);  // Update wishlist count
+                },
+                error: function(xhr) {
+                    console.error("Error fetching counts: ", xhr.responseText);
+                }
+            });
+        }
+
         $(document).ready(function() {
             $('#profileManagement').click(function() {
                 $('#profileSubMenu').toggle();
@@ -155,25 +297,53 @@
                 $('#mainContent').load(url);
             });
 
-            $('#dashboard').click(function() {
-                $('#mainContent').html('<h6>Welcome to Your Dashboard</h6>');
-            });
-
-            $('#submittedCattle').click(function() {
-                // Load the cattle details in the main content area
-                $('#mainContent').load("{% url 'fetch_cattle_details' %}");
-            });
-
-            // Load dashboard content by default
-            $('#dashboard').click();
-
+            // Load the cattle details in the main content area
+          
             // Load cart content in main content area
             $('#cartLink').click(function() {
                 $('#mainContent').load("{% url 'view_cart' %}");
             });
+
+            // Load wishlist content in main content area
+            $('#wishlistLink').click(function(e) {
+                e.preventDefault();
+                $('#mainContent').load("{% url 'wishlisted_item' %}");
+            });
+
+            $('#paymentLink').click(function() {
+                $('#mainContent').load("{% url 'payment_details' %}", function() {
+                    // Reapply any necessary event handlers or scripts here after loading
+                });
+            });
+           
+            $('#dashboardLink').click(function(e) {
+                e.preventDefault();  // Prevent the default anchor link behavior
+                location.reload();   // Reload the current page
+            });
+            
+            
+            $('#submittedCattle').click(function() {
+                $('#mainContent').load("{% url 'fetch_cattle_details' %}", function() {
+                    // Reapply any necessary scripts after cattle details are loaded
+                });
+            });
+
+            // Call this function whenever an item is added or removed from the cart
+            $('.remove-from-wishlist').click(function() {
+                // Existing code for removing from wishlist...
+                // After successful removal, update counts
+                updateCartAndWishlistCounts();
+            });
+
+            // Example for adding to cart (you should have similar logic in your add to cart function)
+            $('.add-to-cart').click(function() {
+                // Existing code for adding to cart...
+                // After successful addition, update counts
+                updateCartAndWishlistCounts();
+            });
         });
-        
     </script>
+
+    
 </body>
 </html>
-

@@ -2,8 +2,13 @@ from django.urls import path
 from . import views
 from django.conf import settings
 from django.conf.urls.static import static
+from .views import download_invoice
+from .views import invoice
+
 
 urlpatterns = [
+    # ... existing paths ...
+    
     path('', views.index, name='index'),
     path('logout/', views.userlogout, name='logout'),
     path('login/', views.login_page, name='login_page'),
@@ -30,12 +35,32 @@ urlpatterns = [
     path('user_productlogview/<int:product_id>/', views.user_productlogview, name='user_productlogview'),
     path('adminview_cattle/', views.adminview_cattle, name='adminview_cattle'),
     path('category/<int:category_id>/', views.category_detail, name='category_detail'),
-    path('category_log/<int:category_id>/', views.category_detaillog, name='category_detaillog'),
+    path('category_log/<int:category_id>/', views.category_detaillog, name='category_detaillog'), 
+    path('update-cattle-status/<int:cattle_id>/', views.update_cattle_status, name='update_cattle_status'),
+    path('toggle_subcategory_status/', views.toggle_subcategory_status, name='toggle_subcategory_status'),
+   
+    path('vaccination_center/', views.vaccination_center, name='vaccination_center'),
+    path('toggle_vaccination_center/<int:center_id>/', views.toggle_vaccination_center, name='toggle_vaccination_center'),
+    path('fetch_cattle_details/', views.fetch_cattle_details, name='fetch_cattle_details'),
+    path('edit_cattle/<int:cattle_id>/', views.edit_cattle, name='edit_cattle'),
+    path('cart/', views.view_cart, name='view_cart'),
+    path('cart/add/<int:cattle_id>/', views.add_to_cart, name='add_to_cart'),
+    path('cart/remove/<int:item_id>/', views.remove_from_cart, name='remove_from_cart'),
+    path('cart/update/<int:item_id>/', views.update_cart_quantity, name='update_cart_quantity'),
+    path('toggle_wishlist/', views.toggle_wishlist, name='toggle_wishlist'),
+    path('wishlisted_item/', views.wishlisted_item, name='wishlisted_item'),
+    path('remove_from_wishlist/', views.remove_from_wishlist, name='remove_from_wishlist'),
+    path('payment/', views.payment, name='payment'),
+    path('save_payment/', views.save_payment, name='save_payment'),
+    path('payment_details/', views.payment_details, name='payment_details'),
     
-
-    
-    
-    
+    path('vaccination_center_dashboard/', views.vaccination_center_dashboard, name='vaccination_center_dashboard'),
+    path('vaccination_center_logout/', views.vaccination_center_logout, name='vaccination_center_logout'),
+    path('add_vaccine/', views.add_vaccine, name='add_vaccine'),
+    path('get_cart_wishlist_counts/', views.get_cart_wishlist_counts, name='get_cart_wishlist_counts'),
+    path('download_invoice/<str:payment_id>/', download_invoice, name='download_invoice'),
+    path('sales_details/', views.sales_details_list, name='sales_details_list'),
+    path('invoice/<str:payment_id>/', invoice, name='invoice'),
 ]
 
 if settings.DEBUG:

@@ -1,0 +1,118 @@
+<div class="container" style="margin-top: 100px;">
+    <h4 style="color: #3498db;">Payment Details</h4>
+
+    {% if payment_details %}
+    <div class="payment-details">
+        {% for payment in payment_details %}
+        <div class="payment-item">
+            <div class="payment-header">
+                <h5>Payment {{ forloop.counter }}</h5>
+                <span class="payment-status">Status: Paid</span>
+            </div>
+            <div class="payment-info">
+                <div class="owner-detail">
+                    <strong style="color: #3498db;">Owner:</strong> {{ payment.cattle.user.first_name }} {{ payment.cattle.user.last_name }}<br>
+                    <small>Contact:</small> {{ payment.cattle.user.contact }}<br>
+                    <small>Email:</small> {{ payment.cattle.user.email }}<br>
+                    <small>City:</small> {{ payment.cattle.user.city }}
+                </div>
+            
+                <div class="cattle-detail">
+                    <strong style="color: #3498db;">Cattle:</strong> {{ payment.cattle.subcategory.subcategory_name }}<br>
+                    <small>Amount:</small> {{ payment.amount }}<br>
+                    <small>Date:</small> {{ payment.payment_date|date:"F d, Y" }}<br>
+                    &nbsp;&nbsp;
+                    <a href="{% url 'invoice' payment_id=payment.payment_id %}" class="btn btn-primary" style="margin-top: 10px; ;font-size: 0.8em;" >
+                        <i class="fas fa-eye"></i> View Invoice
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="no-transaction">
+        <p>No transactions have occurred.</p>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .container {
+        max-width: 700px;
+        margin: auto;
+    }
+
+    .payment-details {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .payment-item {
+        border: 1px solid #ddd;
+        padding: 15px;
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s ease;
+    }
+
+    .payment-item:hover {
+        transform: scale(1.02);
+    }
+
+    .payment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .payment-item h5 {
+        color: #3498db;
+        font-size: 1.3em; /* Increased font size */
+        margin: 0;
+    }
+
+    .payment-status {
+        color: #28a745;
+        font-weight: bold;
+        font-size: 1em; /* Increased font size */
+    }
+
+    .payment-info {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 10px;
+    }
+
+    .owner-detail, .cattle-detail {
+        font-size: 1em; /* Increased font size */
+        color: #555;
+    }
+
+    .owner-detail strong, .cattle-detail strong {
+        font-size: 1.1em; /* Increased font size */
+        color: #333;
+    }
+
+    .owner-detail small, .cattle-detail small {
+        font-size: 0.9em; /* Slightly increased font size */
+        color: #777;
+    }
+
+    .no-transaction {
+        text-align: center;
+        margin: 40px 0;
+    }
+
+    .no-transaction p {
+        font-size: 1.5em;
+        color: #888;
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        display: inline-block;
+    }
+</style>
